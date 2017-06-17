@@ -137,6 +137,138 @@ class EGL(object):
             raise Exception("Could not make our surface current")
 
 
+FRAGMENT_SHADER = b"""
+    precision mediump float;
+    void main(void) {
+        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    }
+"""
+
+VERTEX_SHADER = b"""
+    attribute vec3 aVertexPosition;
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+    void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+    }
+"""
+
+
+def create_shader(code, shader_type):
+    shader = opengles.glCreateShader(shader_type);
+    opengles.glShaderSource(shader, 1, ctypes.byref(ctypes.c_char_p(code)), 0)
+    opengles.glCompileShader(shader);
+
+    compile_status = ctypes.c_int()
+    opengles.glGetShaderiv(shader, GL_COMPILE_STATUS, ctypes.byref(compile_status))
+    print(compile_status)
+    if compile_status == 0:
+        N = 1024
+        log = (ctypes.c_char*N)()
+        loglen = ctypes.c_int()
+        opengles.glGetShaderInfoLog(shader, N, ctypes.byref(loglen), ctypes.byref(log))
+        raise Exception("Shader compile error: {}".format(log.value))
+
+    return shader
+    
+
+class Program:
+    def __init__(self):
+        self.gl_program = opengles.glCreateProgram()
+
+
+def init_shaders():
+    fragment_shader = create_shader(FRAGMENT_SHADER, GL_FRAGMENT_SHADER)
+    vertex_shader = create_shader(VERTEX_SHADER, GL_VERTEX_SHADER)
+
+    shader_program = Program()
+    opengles.glAttachShader(shader_program.gl_program, vertex_shader)
+    opengles.glAttachShader(shader_program.gl_program, fragment_shader)
+    opengles.glLinkProgram(shader_program.gl_program)
+
+    link_status = ctypes.c_int()
+    opengles.glGetProgramiv(
+        shader_program.gl_program, GL_LINK_STATUS, ctypes.byref(link_status)
+    )
+    if link_status == 0:
+        N = 1024
+        log = (ctypes.c_char*N)()
+        loglen = ctypes.c_int()
+        opengles.glGetProgramInfoLog(
+            shader_program.gl_program, N, ctypes.byref(loglen),ctypes.byref(log)
+        )
+        raise Exception("Program link error: {}".format(log.value))
+
+    opengles.glUseProgram(shader_program.gl_program)
+    shader_program.vertex_position_attribute = opengles.glGetAttribLocation(
+        shader_program.gl_program, "aVertexPosition"
+    )
+    opengles.glEnableVertexAttribArray(shader_program.vertex_position_attribute)
+
+    shader_program.p_matrix_uniform = opengles.glGetUniformLocation(
+        shader_program.gl_program, "uPMatrix"
+    )
+    shader_program.mv_matrix_uniform = opengles.glGetUniformLocation(
+        shader_program.gl_program, "uMVMatrix"
+    )
+
+
+
+class Buffer:
+
+    def __init__(self):
+        self.egl_buffer = eglint()
+        opengles.glGenBuffers(1, ctypes.byref(self.egl_buffer))
+        
+
+
+def init_buffers(): 
+    triangle_vertex_position_buffer = Buffer()
+    opengles.glBindBuffer(GL_ARRAY_BUFFER, triangle_vertex_position_buffer.egl_buffer)
+    vertices = eglfloats((
+        0.0,  1.0,  0.0,
+       -1.0, -1.0,  0.0,
+        1.0, -1.0,  0.0,
+    ))
+    opengles.glBufferData(
+        GL_ARRAY_BUFFER, 
+        ctypes.sizeof(vertices), ctypes.byref(vertices),
+        GL_STATIC_DRAW
+    )
+    triangle_vertex_position_buffer.item_size = 3
+    triangle_vertex_position_buffer.num_items = 3
+
+    square_vertex_position_buffer = Buffer()
+    opengles.glBindBuffer(GL_ARRAY_BUFFER, square_vertex_position_buffer.egl_buffer)
+    vertices = eglfloats((
+        1.0,  1.0,  0.0,
+       -1.0,  1.0,  0.0,
+        1.0, -1.0,  0.0,
+       -1.0, -1.0,  0.0
+    ))
+    opengles.glBufferData(
+        GL_ARRAY_BUFFER, 
+        ctypes.sizeof(vertices), ctypes.byref(vertices),
+        GL_STATIC_DRAW
+    )
+    square_vertex_position_buffer.item_size = 3
+    square_vertex_position_buffer.num_items = 4
+
+
+def check_for_error():
+    e = opengles.glGetError()
+    if e:
+        raise Exception("GL error {}".format(hex(e)))
+
+
+def draw_scene(egl):
+    opengles.glViewport(0, 0, egl.width, egl.height)
+    check_for_error()
+
+    opengles.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    
+
+
 class Demo(object):
 
     def showlog(self,shader):
@@ -424,6 +556,10 @@ def showerror():
 
 def main():
     egl = EGL()
+    init_shaders()
+    init_buffers()
+    draw_scene(egl)
+    return
     d = Demo(egl)
     d.draw_mandelbrot_to_texture(0.003)
     while 1:

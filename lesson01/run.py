@@ -78,45 +78,69 @@ class EGL(object):
                                                                     
         numconfig = eglint()
         config = ctypes.c_void_p()
-        r = openegl.eglChooseConfig(self.display,
-                                     ctypes.byref(attribute_list),
-                                     ctypes.byref(config), 1,
-                                     ctypes.byref(numconfig));
-        assert r
+        r = openegl.eglChooseConfig(
+            self.display,
+            ctypes.byref(attribute_list),
+            ctypes.byref(config), 1,
+            ctypes.byref(numconfig)
+        )
+        if r == 0:
+            raise Exception("Could not choose EGL config")
+
         r = openegl.eglBindAPI(EGL_OPENGL_ES_API)
-        assert r
+        if r == 0:
+            raise Exception("Could not bind config")
+
         if verbose:
             print('numconfig={}'.format(numconfig))
-        context_attribs = eglints( (EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE) )
-        self.context = openegl.eglCreateContext(self.display, config,
-                                        EGL_NO_CONTEXT,
-                                        ctypes.byref(context_attribs))
-        assert self.context != EGL_NO_CONTEXT
+
+        context_attribs = eglints((EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE))
+        self.context = openegl.eglCreateContext(
+            self.display, config,
+            EGL_NO_CONTEXT,
+            ctypes.byref(context_attribs)
+        )
+        if self.context == EGL_NO_CONTEXT:
+            raise Exception("Could not create EGL context")
+
         width = eglint()
         height = eglint()
-        s = bcm.graphics_get_display_size(0,ctypes.byref(width),ctypes.byref(height))
+        s = bcm.graphics_get_display_size(0, ctypes.byref(width),ctypes.byref(height))
         self.width = width
         self.height = height
-        assert s>=0
+        if s < 0:
+            raise Exception("Could not get display size")
+
         dispman_display = bcm.vc_dispmanx_display_open(0)
-        dispman_update = bcm.vc_dispmanx_update_start( 0 )
-        dst_rect = eglints( (0,0,width.value,height.value) )
-        src_rect = eglints( (0,0,width.value<<16, height.value<<16) )
-        assert dispman_update
-        assert dispman_display
-        dispman_element = bcm.vc_dispmanx_element_add ( dispman_update, dispman_display,
-                                  0, ctypes.byref(dst_rect), 0,
-                                  ctypes.byref(src_rect),
-                                  DISPMANX_PROTECTION_NONE,
-                                  0 , 0, 0)
-        bcm.vc_dispmanx_update_submit_sync( dispman_update )
-        nativewindow = eglints((dispman_element,width,height));
+        if dispman_display == 0:
+            raise Exception("Could not open display")
+
+        dispman_update = bcm.vc_dispmanx_update_start(0)
+        if dispman_update == 0:
+            raise Exception("Could not start updating display")
+
+        dst_rect = eglints((0, 0, width.value, height.value))
+        src_rect = eglints((0, 0, width.value<<16, height.value<<16))
+        dispman_element = bcm.vc_dispmanx_element_add(
+            dispman_update, dispman_display,
+            0, ctypes.byref(dst_rect), 0,
+            ctypes.byref(src_rect),
+            DISPMANX_PROTECTION_NONE,
+            0, 0, 0
+        )
+        bcm.vc_dispmanx_update_submit_sync(dispman_update)
+
+        nativewindow = eglints((dispman_element, width, height))
         nw_p = ctypes.pointer(nativewindow)
         self.nw_p = nw_p
-        self.surface = openegl.eglCreateWindowSurface( self.display, config, nw_p, 0)
-        assert self.surface != EGL_NO_SURFACE
-        r = openegl.eglMakeCurrent(self.display, self.surface, self.surface, self.context)
-        assert r
+        self.surface = openegl.eglCreateWindowSurface(self.display, config, nw_p, 0)
+        if self.surface == EGL_NO_SURFACE:
+            raise Exception("Could not create surface")
+
+        r = openegl.eglMakeCurrent(self.display, self.surface, self.surface, self.context) 
+        if r == 0:
+            raise Exception("Could not make our surface current")
+
 
 class demo():
 

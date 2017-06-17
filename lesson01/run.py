@@ -54,36 +54,27 @@ def check(e):
 
 class EGL(object):
 
-    def __init__(self,depthbuffer=False):
+    def __init__(self):
         """Opens up the OpenGL library and prepares a window for display"""
         b = bcm.bcm_host_init()
         if b != 0:
             raise Exception("Could not initialize Pi GPU")
 
         self.display = openegl.eglGetDisplay(EGL_DEFAULT_DISPLAY)
-        if not self.display:
+        if self.display == 0:
             raise Exception("Could not open EGL display")
 
-        if not openegl.eglInitialize(self.display, 0, 0):
+        if openegl.eglInitialize(self.display, 0, 0) == 0:
             raise Exception("Could not initialise EGL")
 
-        if depthbuffer:
-            attribute_list = eglints(     (EGL_RED_SIZE, 8,
-                                      EGL_GREEN_SIZE, 8,
-                                      EGL_BLUE_SIZE, 8,
-                                      EGL_ALPHA_SIZE, 8,
-                                      EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-                                      EGL_DEPTH_SIZE, 16,
-                                      EGL_NONE) )
-        else:
-            attribute_list = eglints(     (EGL_RED_SIZE, 8,
-                                      EGL_GREEN_SIZE, 8,
-                                      EGL_BLUE_SIZE, 8,
-                                      EGL_ALPHA_SIZE, 8,
-                                      EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-                                      EGL_NONE) )
-        # EGL_SAMPLE_BUFFERS,  1,
-        # EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        attribute_list = eglints((
+            EGL_RED_SIZE, 8,
+            EGL_GREEN_SIZE, 8,
+            EGL_BLUE_SIZE, 8,
+            EGL_ALPHA_SIZE, 8,
+            EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+            EGL_NONE
+        ))
                                                                     
         numconfig = eglint()
         config = ctypes.c_void_p()

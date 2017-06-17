@@ -47,14 +47,6 @@ def eglfloats(L):
     return (eglfloat*len(L))(*L)
 
                 
-def check(e):
-    """Checks that error is zero"""
-    if e==0: return
-    if verbose:
-        print('Error code {}'.format(hex(e&0xffffffff)))
-    raise ValueError
-
-
 class EGL(object):
 
     def __init__(self):

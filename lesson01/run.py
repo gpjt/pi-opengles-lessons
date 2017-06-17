@@ -1,24 +1,19 @@
 #
+# Copyright (c) 2017 Giles Thomas
 # Copyright (c) 2012 Peter de Rivaz
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted.
 #
-# Raspberry Pi 3d demo using OpenGLES 2.0 via Python
-#
-# Version 0.1 (Draws a rectangle using vertex and fragment shaders)
-# Version 0.2 (Draws a Julia set on top of a Mandelbrot controlled by the mouse.  Mandelbrot rendered to texture in advance.
 
 import ctypes
 import time
 import math
+
 # Pick up our constants extracted from the header files with prepare_constants.py
 from egl import *
 from gl2 import *
 from gl2ext import *
-
-# Define verbose=True to get debug messages
-verbose = True
 
 # Define some extra constants that the automatic extraction misses
 EGL_DEFAULT_DISPLAY = 0
@@ -85,9 +80,6 @@ class EGL(object):
         r = openegl.eglBindAPI(EGL_OPENGL_ES_API)
         if r == 0:
             raise Exception("Could not bind config")
-
-        if verbose:
-            print('numconfig={}'.format(numconfig))
 
         context_attribs = eglints((EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE))
         self.context = openegl.eglCreateContext(
@@ -161,7 +153,6 @@ def create_shader(code, shader_type):
 
     compile_status = ctypes.c_int()
     opengles.glGetShaderiv(shader, GL_COMPILE_STATUS, ctypes.byref(compile_status))
-    print(compile_status)
     if compile_status == 0:
         N = 1024
         log = (ctypes.c_char*N)()

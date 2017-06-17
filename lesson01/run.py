@@ -42,8 +42,10 @@ def eglints(L):
 
 eglfloat = ctypes.c_float
 
+
 def eglfloats(L):
     return (eglfloat*len(L))(*L)
+
                 
 def check(e):
     """Checks that error is zero"""
@@ -51,6 +53,7 @@ def check(e):
     if verbose:
         print('Error code {}'.format(hex(e&0xffffffff)))
     raise ValueError
+
 
 class EGL(object):
 
@@ -142,7 +145,7 @@ class EGL(object):
             raise Exception("Could not make our surface current")
 
 
-class demo():
+class Demo(object):
 
     def showlog(self,shader):
         """Prints the compile log for a shader"""
@@ -160,7 +163,8 @@ class demo():
         opengles.glGetProgramInfoLog(shader,N,ctypes.byref(loglen),ctypes.byref(log))
         print(log.value)
             
-    def __init__(self):
+    def __init__(self, egl):
+        self.egl = egl
         self.vertex_data = eglfloats((-1.0,-1.0,1.0,1.0,
                          1.0,-1.0,1.0,1.0,
                          1.0,1.0,1.0,1.0,
@@ -349,7 +353,7 @@ class demo():
         opengles.glBindFramebuffer(GL_FRAMEBUFFER,0)
         self.check()
         # Prepare viewport
-        opengles.glViewport ( 0, 0, egl.width, egl.height );
+        opengles.glViewport ( 0, 0, self.egl.width, self.egl.height );
         self.check()
         
         # Upload vertex data to a buffer
@@ -412,7 +416,7 @@ class demo():
         opengles.glFinish()
         self.check()
         
-        openegl.eglSwapBuffers(egl.display, egl.surface);
+        openegl.eglSwapBuffers(self.egl.display, self.egl.surface);
         self.check()      
         
     def check(self):
@@ -424,10 +428,11 @@ class demo():
 def showerror():
     e=opengles.glGetError()
     print(hex(e))
-    
-if __name__ == "__main__":
+
+
+def main():
     egl = EGL()
-    d = demo()
+    d = Demo(egl)
     d.draw_mandelbrot_to_texture(0.003)
     while 1:
         offset=(400,600)
@@ -435,6 +440,6 @@ if __name__ == "__main__":
         time.sleep(0.01)
     showerror()
 
-
-        
     
+if __name__ == "__main__":
+    main()

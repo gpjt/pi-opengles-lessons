@@ -49,7 +49,7 @@ def check(e):
     """Checks that error is zero"""
     if e==0: return
     if verbose:
-        print 'Error code',hex(e&0xffffffff)
+        print('Error code {}'.format(hex(e&0xffffffff)))
     raise ValueError
 
 class EGL(object):
@@ -95,7 +95,7 @@ class EGL(object):
         r = openegl.eglBindAPI(EGL_OPENGL_ES_API)
         assert r
         if verbose:
-            print 'numconfig=',numconfig
+            print('numconfig={}'.format(numconfig))
         context_attribs = eglints( (EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE) )
         self.context = openegl.eglCreateContext(self.display, config,
                                         EGL_NO_CONTEXT,
@@ -135,7 +135,7 @@ class demo():
         log=(ctypes.c_char*N)()
         loglen=ctypes.c_int()
         opengles.glGetShaderInfoLog(shader,N,ctypes.byref(loglen),ctypes.byref(log))
-        print log.value
+        print(log.value)
 
     def showprogramlog(self,shader):
         """Prints the compile log for a program"""
@@ -143,31 +143,31 @@ class demo():
         log=(ctypes.c_char*N)()
         loglen=ctypes.c_int()
         opengles.glGetProgramInfoLog(shader,N,ctypes.byref(loglen),ctypes.byref(log))
-        print log.value
+        print(log.value)
             
     def __init__(self):
         self.vertex_data = eglfloats((-1.0,-1.0,1.0,1.0,
                          1.0,-1.0,1.0,1.0,
                          1.0,1.0,1.0,1.0,
                          -1.0,1.0,1.0,1.0))
-        self.vshader_source = ctypes.c_char_p(
-              "attribute vec4 vertex;"
-              "varying vec2 tcoord;"
-              "void main(void) {"
-              "  vec4 pos = vertex;"
-              "  pos.xy*=0.9;"
-              "  gl_Position = pos;"
-              "  tcoord = vertex.xy*0.5+0.5;"
-              "}")
+        self.vshader_source = ctypes.c_char_p(b"""
+              attribute vec4 vertex;
+              varying vec2 tcoord;
+              void main(void) {
+                vec4 pos = vertex;
+                pos.xy*=0.9;
+                gl_Position = pos;
+                tcoord = vertex.xy*0.5+0.5;
+              }""")
       
-        self.fshader_source = ctypes.c_char_p(
-              "uniform vec4 color;"
-              "void main(void) {"
-              "   gl_FragColor = color;"
-              "}")
+        self.fshader_source = ctypes.c_char_p(b"""
+              uniform vec4 color;
+              oid main(void) {
+                gl_FragColor = color;
+              }""")
 
         # Mandelbrot
-        mandelbrot_fshader_source = ctypes.c_char_p("""
+        mandelbrot_fshader_source = ctypes.c_char_p(b"""
 	uniform vec4 color;
 	uniform vec2 scale;
 	varying vec2 tcoord;
@@ -204,7 +204,7 @@ class demo():
 	}""")
 
         # Julia
-        julia_fshader_source = ctypes.c_char_p("""
+        julia_fshader_source = ctypes.c_char_p(b"""
 	uniform vec4 color;
 	uniform vec2 scale;
 	uniform vec2 offset;
@@ -279,11 +279,11 @@ class demo():
             self.showprogramlog(program)
             
         self.program = program
-        self.unif_color = opengles.glGetUniformLocation(program, "color");
-        self.attr_vertex = opengles.glGetAttribLocation(program, "vertex");
-        self.unif_scale = opengles.glGetUniformLocation(program, "scale");
-        self.unif_offset = opengles.glGetUniformLocation(program, "offset");
-        self.unif_tex = opengles.glGetUniformLocation(program, "tex");
+        self.unif_color = opengles.glGetUniformLocation(program, b"color");
+        self.attr_vertex = opengles.glGetAttribLocation(program, b"vertex");
+        self.unif_scale = opengles.glGetUniformLocation(program, b"scale");
+        self.unif_offset = opengles.glGetUniformLocation(program, b"offset");
+        self.unif_tex = opengles.glGetUniformLocation(program, b"tex");
         
 
         program2 = opengles.glCreateProgram();
@@ -295,9 +295,9 @@ class demo():
             self.showprogramlog(program2)
             
         self.program2 = program2
-        self.attr_vertex2 = opengles.glGetAttribLocation(program2, "vertex");
-        self.unif_scale2 = opengles.glGetUniformLocation(program2, "scale");
-        self.unif_offset2 = opengles.glGetUniformLocation(program2, "offset");
+        self.attr_vertex2 = opengles.glGetAttribLocation(program2, b"vertex");
+        self.unif_scale2 = opengles.glGetUniformLocation(program2, b"scale");
+        self.unif_offset2 = opengles.glGetUniformLocation(program2, b"offset");
    
         opengles.glClearColor ( eglfloat(0.0), eglfloat(1.0), eglfloat(1.0), eglfloat(1.0) );
         
@@ -403,12 +403,12 @@ class demo():
     def check(self):
         e=opengles.glGetError()
         if e:
-            print hex(e)
+            print(hex(e))
             raise ValueError
         
 def showerror():
     e=opengles.glGetError()
-    print hex(e)
+    print(hex(e))
     
 if __name__ == "__main__":
     egl = EGL()

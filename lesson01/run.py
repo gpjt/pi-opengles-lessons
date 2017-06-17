@@ -212,6 +212,8 @@ def init_shaders():
         shader_program.gl_program, "uMVMatrix"
     )
 
+    return shader_program
+
 
 
 class Buffer:
@@ -254,6 +256,8 @@ def init_buffers():
     square_vertex_position_buffer.item_size = 3
     square_vertex_position_buffer.num_items = 4
 
+    return triangle_vertex_position_buffer, square_vertex_position_buffer
+
 
 def check_for_error():
     e = opengles.glGetError()
@@ -261,11 +265,33 @@ def check_for_error():
         raise Exception("GL error {}".format(hex(e)))
 
 
-def draw_scene(egl):
+def draw_scene(
+    egl, shader_program, triangle_vertex_position_buffer, square_vertex_position_buffer
+):
     opengles.glViewport(0, 0, egl.width, egl.height)
     check_for_error()
 
     opengles.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+    # Need to set up matrices here
+    
+    opengles.glBindBuffer(GL_ARRAY_BUFFER, triangle_vertex_position_buffer.egl_buffer)
+    opengles.glVertexAttribPointer(
+        shader_program.vertex_position_attribute, 
+        triangle_vertex_position_buffer.item_size, GL_FLOAT, False, 0, 0
+    )
+    # Need to set uniforms
+    opengles.glDrawArrays(GL_TRIANGLES, 0, triangle_vertex_position_buffer.num_items)
+
+    # Shift matrix 
+
+    opengles.glBindBuffer(GL_ARRAY_BUFFER, square_vertex_position_buffer.egl_buffer)
+    opengles.glVertexAttribPointer(
+        shader_program.vertex_position_attribute,
+        square_vertex_position_buffer.item_size, GL_FLOAT, False, 0, 0
+    )
+    # Need to set uniforms
+    opengles.glDrawArrays(GL_TRIANGLE_STRIP, 0, square_vertex_position_buffer.num_items)
     
 
 
@@ -556,9 +582,11 @@ def showerror():
 
 def main():
     egl = EGL()
-    init_shaders()
-    init_buffers()
-    draw_scene(egl)
+    shader_program = init_shaders()
+    triangle_vertex_position_buffer, square_vertex_position_buffer = init_buffers()
+    draw_scene(
+        egl, shader_program, triangle_vertex_position_buffer, square_vertex_position_buffer
+    )
     return
     d = Demo(egl)
     d.draw_mandelbrot_to_texture(0.003)

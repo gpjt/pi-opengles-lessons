@@ -268,31 +268,49 @@ def check_for_error():
 def draw_scene(
     egl, shader_program, triangle_vertex_position_buffer, square_vertex_position_buffer
 ):
+    opengles.glBindFramebuffer(GL_FRAMEBUFFER, 0)
     opengles.glViewport(0, 0, egl.width, egl.height)
     check_for_error()
 
     opengles.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    check_for_error()
 
     # Need to set up matrices here
     
     opengles.glBindBuffer(GL_ARRAY_BUFFER, triangle_vertex_position_buffer.egl_buffer)
+    check_for_error()
     opengles.glVertexAttribPointer(
         shader_program.vertex_position_attribute, 
         triangle_vertex_position_buffer.item_size, GL_FLOAT, False, 0, 0
     )
+    check_for_error()
     # Need to set uniforms
     opengles.glDrawArrays(GL_TRIANGLES, 0, triangle_vertex_position_buffer.num_items)
+    check_for_error()
 
     # Shift matrix 
 
     opengles.glBindBuffer(GL_ARRAY_BUFFER, square_vertex_position_buffer.egl_buffer)
+    check_for_error()
     opengles.glVertexAttribPointer(
         shader_program.vertex_position_attribute,
         square_vertex_position_buffer.item_size, GL_FLOAT, False, 0, 0
     )
+    check_for_error()
     # Need to set uniforms
     opengles.glDrawArrays(GL_TRIANGLE_STRIP, 0, square_vertex_position_buffer.num_items)
-    
+    check_for_error()
+
+    opengles.glBindBuffer(GL_ARRAY_BUFFER, 0);
+    check_for_error()
+
+    opengles.glFlush()
+    check_for_error()
+    opengles.glFinish()
+    check_for_error()
+
+    openegl.eglSwapBuffers(egl.display, egl.surface);
+    check_for_error()
 
 
 class Demo(object):
@@ -584,17 +602,21 @@ def main():
     egl = EGL()
     shader_program = init_shaders()
     triangle_vertex_position_buffer, square_vertex_position_buffer = init_buffers()
-    draw_scene(
-        egl, shader_program, triangle_vertex_position_buffer, square_vertex_position_buffer
-    )
-    return
-    d = Demo(egl)
-    d.draw_mandelbrot_to_texture(0.003)
-    while 1:
-        offset=(400,600)
-        d.draw_triangles(0.003,offset)
-        time.sleep(0.01)
-    showerror()
+    if True:
+        while True:
+            draw_scene(
+                egl, shader_program,
+                triangle_vertex_position_buffer,
+                square_vertex_position_buffer
+            )
+    else:
+        d = Demo(egl)
+        d.draw_mandelbrot_to_texture(0.003)
+        while 1:
+            offset=(400,600)
+            d.draw_triangles(0.003,offset)
+            time.sleep(0.01)
+        showerror()
 
     
 if __name__ == "__main__":

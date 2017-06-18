@@ -10,7 +10,7 @@ import ctypes
 import math
 import numpy as np
 
-from gl2 import (
+from pygl.gl2 import (
     GL_ARRAY_BUFFER,
     GL_COLOR_BUFFER_BIT,
     GL_COMPILE_STATUS,
@@ -25,7 +25,7 @@ from gl2 import (
     GL_TRIANGLE_STRIP,
     GL_VERTEX_SHADER,
 )
-from egl import EGL
+from pygl.egl import EGL
 
 opengles = ctypes.CDLL('libGLESv2.so')
 

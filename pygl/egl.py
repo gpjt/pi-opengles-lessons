@@ -9,7 +9,7 @@
 import ctypes
 
 # Pick up our constants extracted from the header files with prepare_constants.py
-import egl_constants
+from pygl import egl_constants
 
 # Define some extra constants that the automatic extraction misses
 egl_constants.EGL_DEFAULT_DISPLAY = 0

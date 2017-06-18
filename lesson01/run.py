@@ -225,15 +225,15 @@ def init_shaders():
 class Buffer:
 
     def __init__(self):
-        self.egl_buffer = eglint()
-        opengles.glGenBuffers(1, ctypes.byref(self.egl_buffer))
+        self.gl_buffer = ctypes.c_int()
+        opengles.glGenBuffers(1, ctypes.byref(self.gl_buffer))
         check_for_error()
         
 
 
 def init_buffers(): 
     triangle_vertex_position_buffer = Buffer()
-    opengles.glBindBuffer(GL_ARRAY_BUFFER, triangle_vertex_position_buffer.egl_buffer)
+    opengles.glBindBuffer(GL_ARRAY_BUFFER, triangle_vertex_position_buffer.gl_buffer)
     check_for_error()
     vertices = eglfloats((
         0.0,  1.0,  0.0,
@@ -250,7 +250,7 @@ def init_buffers():
     triangle_vertex_position_buffer.num_items = 3
 
     square_vertex_position_buffer = Buffer()
-    opengles.glBindBuffer(GL_ARRAY_BUFFER, square_vertex_position_buffer.egl_buffer)
+    opengles.glBindBuffer(GL_ARRAY_BUFFER, square_vertex_position_buffer.gl_buffer)
     check_for_error()
     vertices = eglfloats((
         1.0,  1.0,  0.0,
@@ -315,7 +315,7 @@ def draw_scene(
     mv_matrix = np.identity(4)
 
     mv_matrix = mv_matrix * translate([-1.5, 0.0, -7.0])
-    opengles.glBindBuffer(GL_ARRAY_BUFFER, triangle_vertex_position_buffer.egl_buffer)
+    opengles.glBindBuffer(GL_ARRAY_BUFFER, triangle_vertex_position_buffer.gl_buffer)
     check_for_error()
     opengles.glVertexAttribPointer(
         shader_program.vertex_position_attribute, 
@@ -336,7 +336,7 @@ def draw_scene(
     check_for_error()
 
     mv_matrix = mv_matrix * translate([3.0, 0.0, 0.0])
-    opengles.glBindBuffer(GL_ARRAY_BUFFER, square_vertex_position_buffer.egl_buffer)
+    opengles.glBindBuffer(GL_ARRAY_BUFFER, square_vertex_position_buffer.gl_buffer)
     check_for_error()
     opengles.glVertexAttribPointer(
         shader_program.vertex_position_attribute,

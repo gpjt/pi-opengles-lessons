@@ -291,10 +291,10 @@ def perspective(fovy, aspect, n, f):
 def translate(xyz):
     x, y, z = xyz
     return np.matrix([
-        [1,0,0,x],
-        [0,1,0,y],
-        [0,0,1,z],
-        [0,0,0,1]
+        [1, 0, 0, x],
+        [0, 1, 0, y],
+        [0, 0, 1, z],
+        [0, 0, 0, 1]
     ])
 
 
@@ -324,12 +324,12 @@ def draw_scene(
     check_for_error()
     opengles.glUniformMatrix4fv(
         shader_program.p_matrix_uniform, 1, False, 
-        p_matrix.ctypes.data
+        np.ascontiguousarray(p_matrix.T, dtype=np.float32).ctypes.data
     )
     check_for_error()
     opengles.glUniformMatrix4fv(
         shader_program.mv_matrix_uniform, 1, False,
-        mv_matrix.ctypes.data
+        np.ascontiguousarray(mv_matrix.T, dtype=np.float32).ctypes.data
     )
     check_for_error()
     opengles.glDrawArrays(GL_TRIANGLES, 0, triangle_vertex_position_buffer.num_items)
@@ -345,12 +345,12 @@ def draw_scene(
     check_for_error()
     opengles.glUniformMatrix4fv(
         shader_program.p_matrix_uniform, 1, False, 
-        p_matrix.ctypes.data
+        np.ascontiguousarray(p_matrix.T, dtype=np.float32).ctypes.data
     )
     check_for_error()
     opengles.glUniformMatrix4fv(
         shader_program.mv_matrix_uniform, 1, False,
-        mv_matrix.ctypes.data
+        np.ascontiguousarray(mv_matrix.T, dtype=np.float32).ctypes.data
     )
     check_for_error()
     opengles.glDrawArrays(GL_TRIANGLE_STRIP, 0, square_vertex_position_buffer.num_items)
@@ -372,7 +372,7 @@ def main():
     egl = EGL()
     shader_program = init_shaders()
     triangle_vertex_position_buffer, square_vertex_position_buffer = init_buffers()
-    opengles.glClearColor(eglfloat(0.0), eglfloat(0.25), eglfloat(0.0), eglfloat(1.0))
+    opengles.glClearColor(eglfloat(0.0), eglfloat(0.0), eglfloat(0.0), eglfloat(1.0))
     opengles.glEnable(GL_DEPTH_TEST)
     while True:
         draw_scene(

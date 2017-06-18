@@ -18,6 +18,9 @@ egl_constants.EGL_NO_DISPLAY = 0
 egl_constants.EGL_NO_SURFACE = 0
 egl_constants.DISPMANX_PROTECTION_NONE = 0
 
+from pygl.gl import GL
+
+
 # Open the libraries
 bcm = ctypes.CDLL('libbcm_host.so')
 opengles = ctypes.CDLL('libGLESv2.so')
@@ -117,5 +120,9 @@ class EGL(object):
             raise Exception("Could not make our surface current")
 
 
-    def swapBuffers(self):
+    def get_context(self):
+        return GL()
+
+
+    def swap_buffers(self):
         openegl.eglSwapBuffers(self.display, self.surface)

@@ -70,42 +70,42 @@ def init_shaders(gl):
 
 
 
-class Buffer:
+class Shape:
 
-    def __init__(self, gl):
-        self.gl_buffer = gl.createBuffer()
+    def __init__(self, gl, vertices):
+        self.buffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, self.buffer)
+        gl.bufferData(gl.ARRAY_BUFFER, sum(vertices, []), gl.STATIC_DRAW)
+        self.item_size = len(vertices[0])
+        self.num_items = len(vertices)
 
 
 
 def init_buffers(gl): 
-    triangle_vertex_position_buffer = Buffer(gl)
-    gl.bindBuffer(gl.ARRAY_BUFFER, triangle_vertex_position_buffer.gl_buffer)
-    vertices = [
-        0.0,  1.0,  0.0,
-       -1.0, -1.0,  0.0,
-        1.0, -1.0,  0.0,
-    ]
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
-    triangle_vertex_position_buffer.item_size = 3
-    triangle_vertex_position_buffer.num_items = 3
+    triangle_shape = Shape(
+        gl, 
+        [
+            [ 0.0,  1.0,  0.0],
+            [-1.0, -1.0,  0.0],
+            [ 1.0, -1.0,  0.0],
+        ]
+    )
 
-    square_vertex_position_buffer = Buffer(gl)
-    gl.bindBuffer(gl.ARRAY_BUFFER, square_vertex_position_buffer.gl_buffer)
-    vertices = [
-        1.0,  1.0,  0.0,
-       -1.0,  1.0,  0.0,
-        1.0, -1.0,  0.0,
-       -1.0, -1.0,  0.0
-    ]
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
-    square_vertex_position_buffer.item_size = 3
-    square_vertex_position_buffer.num_items = 4
+    square_shape = Shape(
+        gl,
+        [
+            [ 1.0,  1.0,  0.0],
+            [-1.0,  1.0,  0.0],
+            [ 1.0, -1.0,  0.0],
+            [-1.0, -1.0,  0.0],
+        ]
+    )
 
-    return triangle_vertex_position_buffer, square_vertex_position_buffer
+    return triangle_shape, square_shape
 
 
 def draw_scene(
-    egl, gl, shader_program, triangle_vertex_position_buffer, square_vertex_position_buffer
+    egl, gl, shader_program, triangle_shape, square_shape
 ):
     gl.bindFramebuffer(gl.FRAMEBUFFER, 0)
     gl.viewport(0, 0, egl.width, egl.height)
@@ -116,24 +116,24 @@ def draw_scene(
     mv_matrix = np.identity(4)
 
     mv_matrix = mv_matrix * translate([-1.5, 0.0, -7.0])
-    gl.bindBuffer(gl.ARRAY_BUFFER, triangle_vertex_position_buffer.gl_buffer)
+    gl.bindBuffer(gl.ARRAY_BUFFER, triangle_shape.buffer)
     gl.vertexAttribPointer(
         shader_program.vertex_position_attribute, 
-        triangle_vertex_position_buffer.item_size, gl.FLOAT, False, 0, 0
+        triangle_shape.item_size, gl.FLOAT, False, 0, 0
     )
     gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix.T)
     gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, mv_matrix.T)
-    gl.drawArrays(gl.TRIANGLES, 0, triangle_vertex_position_buffer.num_items)
+    gl.drawArrays(gl.TRIANGLES, 0, triangle_shape.num_items)
 
     mv_matrix = mv_matrix * translate([3.0, 0.0, 0.0])
-    gl.bindBuffer(gl.ARRAY_BUFFER, square_vertex_position_buffer.gl_buffer)
+    gl.bindBuffer(gl.ARRAY_BUFFER, square_shape.buffer)
     gl.vertexAttribPointer(
         shader_program.vertex_position_attribute,
-        square_vertex_position_buffer.item_size, gl.FLOAT, False, 0, 0
+        square_shape.item_size, gl.FLOAT, False, 0, 0
     )
     gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix.T)
     gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, mv_matrix.T)
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, square_vertex_position_buffer.num_items)
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, square_shape.num_items)
 
     gl.bindBuffer(gl.ARRAY_BUFFER, 0);
 
@@ -147,7 +147,7 @@ def main():
     egl = EGL()
     gl = egl.get_context()
     shader_program = init_shaders(gl)
-    triangle_vertex_position_buffer, square_vertex_position_buffer = init_buffers(gl)
+    triangle_shape, square_shape = init_buffers(gl)
     gl.ClearColor(
         ctypes.c_float(0.0), ctypes.c_float(0.0), ctypes.c_float(0.0), ctypes.c_float(1.0)
     )
@@ -156,8 +156,8 @@ def main():
         start = time.time()
         draw_scene(
             egl, gl, shader_program,
-            triangle_vertex_position_buffer,
-            square_vertex_position_buffer
+            triangle_shape,
+            square_shape
         )
         remainder = (1/60.0) - (time.time() - start)
         if remainder > 0:

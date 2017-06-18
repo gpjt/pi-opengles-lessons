@@ -32,6 +32,12 @@ class GL:
             raise Exception("GL error {}".format(hex(e)))
 
 
+    def getProgramParameter(self, program, parameter):
+        result = ctypes.c_int()
+        self.base_gl.getProgramiv(program, parameter, ctypes.byref(result))
+        return result
+
+
     def shaderSource(self, shader, source):
         if isinstance(source, str):
             source = source.encode("utf-8")

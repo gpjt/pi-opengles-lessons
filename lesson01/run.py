@@ -61,12 +61,7 @@ def init_shaders(gl):
     gl.linkProgram(shader_program.gl_program)
     gl.check_for_error()
 
-    link_status = ctypes.c_int()
-    gl.getProgramiv(
-        shader_program.gl_program, gl.LINK_STATUS, ctypes.byref(link_status)
-    )
-    gl.check_for_error()
-    if link_status == 0:
+    if gl.getProgramParameter(shader_program.gl_program, gl.LINK_STATUS) == 0:
         N = 1024
         log = (ctypes.c_char*N)()
         loglen = ctypes.c_int()

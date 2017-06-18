@@ -62,14 +62,8 @@ def init_shaders(gl):
     gl.check_for_error()
 
     if gl.getProgramParameter(shader_program.gl_program, gl.LINK_STATUS) == 0:
-        N = 1024
-        log = (ctypes.c_char*N)()
-        loglen = ctypes.c_int()
-        gl.getProgramInfoLog(
-            shader_program.gl_program, N, ctypes.byref(loglen),ctypes.byref(log)
-        )
-        gl.check_for_error()
-        raise Exception("Program link error: {}".format(log.value))
+        log = gl.getProgramInfoLog(shader_program.gl_program)
+        raise Exception("Program link error: {}".format(log))
 
     gl.useProgram(shader_program.gl_program)
     gl.check_for_error()

@@ -38,6 +38,14 @@ class GL:
         return result
 
 
+    def getProgramInfoLog(self, program):
+        N = 1024
+        log = (ctypes.c_char*N)()
+        loglen = ctypes.c_int()
+        self.base_gl.getProgramInfoLog(program, N, ctypes.byref(loglen), ctypes.byref(log))
+        return log.value.decode("utf-8")
+
+
     def shaderSource(self, shader, source):
         if isinstance(source, str):
             source = source.encode("utf-8")

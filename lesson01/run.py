@@ -8,6 +8,7 @@
 
 import ctypes
 import numpy as np
+import time
 
 from pygl.egl import EGL
 from pygl.matrix_utils import perspective, translate
@@ -191,11 +192,15 @@ def main():
     )
     gl.Enable(gl.DEPTH_TEST)
     while True:
+        start = time.time()
         draw_scene(
             egl, gl, shader_program,
             triangle_vertex_position_buffer,
             square_vertex_position_buffer
         )
+        remainder = (1/60.0) - (time.time() - start)
+        if remainder > 0:
+            time.sleep(remainder)
 
     
 if __name__ == "__main__":

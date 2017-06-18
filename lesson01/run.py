@@ -25,7 +25,7 @@ from gl2 import (
     GL_TRIANGLE_STRIP,
     GL_VERTEX_SHADER,
 )
-from egl import EGL, openegl
+from egl import EGL
 
 opengles = ctypes.CDLL('libGLESv2.so')
 
@@ -184,10 +184,10 @@ def perspective(fovy, aspect, n, f):
     zz = (f+n) / (n-f)
     zw = 2 * f * n / (n-f)
     return np.matrix([
-        [sx,  0,  0, 0],
-        [0,  sy,  0, 0],
-        [0,   0, zz,zw],
-        [0,   0, -1, 0]
+        [sx,  0,  0,  0],
+        [0,  sy,  0,  0],
+        [0,   0, zz, zw],
+        [0,   0, -1,  0]
     ])
 
 
@@ -267,8 +267,7 @@ def draw_scene(
     opengles.glFinish()
     check_for_error()
 
-    openegl.eglSwapBuffers(egl.display, egl.surface);
-    check_for_error()
+    egl.swapBuffers()
 
 
 def main():

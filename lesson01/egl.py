@@ -116,3 +116,6 @@ class EGL(object):
         if r == 0:
             raise Exception("Could not make our surface current")
 
+
+    def swapBuffers(self):
+        openegl.eglSwapBuffers(self.display, self.surface)

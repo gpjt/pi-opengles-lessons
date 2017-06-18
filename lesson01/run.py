@@ -7,127 +7,27 @@
 #
 
 import ctypes
-import time
 import math
 import numpy as np
 
-# Pick up our constants extracted from the header files with prepare_constants.py
-from egl import *
-from gl2 import *
-from gl2ext import *
+from gl2 import (
+    GL_ARRAY_BUFFER,
+    GL_COLOR_BUFFER_BIT,
+    GL_COMPILE_STATUS,
+    GL_DEPTH_BUFFER_BIT,
+    GL_DEPTH_TEST,
+    GL_FLOAT,
+    GL_FRAGMENT_SHADER,
+    GL_FRAMEBUFFER,
+    GL_LINK_STATUS,
+    GL_STATIC_DRAW,
+    GL_TRIANGLES,
+    GL_TRIANGLE_STRIP,
+    GL_VERTEX_SHADER,
+)
+from egl import EGL, openegl
 
-# Define some extra constants that the automatic extraction misses
-EGL_DEFAULT_DISPLAY = 0
-EGL_NO_CONTEXT = 0
-EGL_NO_DISPLAY = 0
-EGL_NO_SURFACE = 0
-DISPMANX_PROTECTION_NONE = 0
-
-# Open the libraries
-bcm = ctypes.CDLL('libbcm_host.so')
 opengles = ctypes.CDLL('libGLESv2.so')
-openegl = ctypes.CDLL('libEGL.so')
-
-eglint = ctypes.c_int
-
-eglshort = ctypes.c_short
-
-def eglints(L):
-    """Converts a tuple to an array of eglints (would a pointer return be better?)"""
-    return (eglint*len(L))(*L)
-
-eglfloat = ctypes.c_float
-
-
-def eglfloats(L):
-    return (eglfloat*len(L))(*L)
-
-                
-class EGL(object):
-
-    def __init__(self):
-        """Opens up the OpenGL library and prepares a window for display"""
-        b = bcm.bcm_host_init()
-        if b != 0:
-            raise Exception("Could not initialize Pi GPU")
-
-        self.display = openegl.eglGetDisplay(EGL_DEFAULT_DISPLAY)
-        if self.display == 0:
-            raise Exception("Could not open EGL display")
-
-        if openegl.eglInitialize(self.display, 0, 0) == 0:
-            raise Exception("Could not initialise EGL")
-
-        attribute_list = eglints((
-            EGL_RED_SIZE, 8,
-            EGL_GREEN_SIZE, 8,
-            EGL_BLUE_SIZE, 8,
-            EGL_ALPHA_SIZE, 8,
-            EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-            EGL_NONE
-        ))
-                                                                    
-        numconfig = eglint()
-        config = ctypes.c_void_p()
-        r = openegl.eglChooseConfig(
-            self.display,
-            ctypes.byref(attribute_list),
-            ctypes.byref(config), 1,
-            ctypes.byref(numconfig)
-        )
-        if r == 0:
-            raise Exception("Could not choose EGL config")
-
-        r = openegl.eglBindAPI(EGL_OPENGL_ES_API)
-        if r == 0:
-            raise Exception("Could not bind config")
-
-        context_attribs = eglints((EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE))
-        self.context = openegl.eglCreateContext(
-            self.display, config,
-            EGL_NO_CONTEXT,
-            ctypes.byref(context_attribs)
-        )
-        if self.context == EGL_NO_CONTEXT:
-            raise Exception("Could not create EGL context")
-
-        width = eglint()
-        height = eglint()
-        s = bcm.graphics_get_display_size(0, ctypes.byref(width),ctypes.byref(height))
-        self.width = width
-        self.height = height
-        if s < 0:
-            raise Exception("Could not get display size")
-
-        dispman_display = bcm.vc_dispmanx_display_open(0)
-        if dispman_display == 0:
-            raise Exception("Could not open display")
-
-        dispman_update = bcm.vc_dispmanx_update_start(0)
-        if dispman_update == 0:
-            raise Exception("Could not start updating display")
-
-        dst_rect = eglints((0, 0, width.value, height.value))
-        src_rect = eglints((0, 0, width.value<<16, height.value<<16))
-        dispman_element = bcm.vc_dispmanx_element_add(
-            dispman_update, dispman_display,
-            0, ctypes.byref(dst_rect), 0,
-            ctypes.byref(src_rect),
-            DISPMANX_PROTECTION_NONE,
-            0, 0, 0
-        )
-        bcm.vc_dispmanx_update_submit_sync(dispman_update)
-
-        nativewindow = eglints((dispman_element, width, height))
-        nw_p = ctypes.pointer(nativewindow)
-        self.nw_p = nw_p
-        self.surface = openegl.eglCreateWindowSurface(self.display, config, nw_p, 0)
-        if self.surface == EGL_NO_SURFACE:
-            raise Exception("Could not create surface")
-
-        r = openegl.eglMakeCurrent(self.display, self.surface, self.surface, self.context) 
-        if r == 0:
-            raise Exception("Could not make our surface current")
 
 
 FRAGMENT_SHADER = b"""
@@ -230,12 +130,15 @@ class Buffer:
         check_for_error()
         
 
+def ctypes_floats(L):
+    return (ctypes.c_float*len(L))(*L)
+
 
 def init_buffers(): 
     triangle_vertex_position_buffer = Buffer()
     opengles.glBindBuffer(GL_ARRAY_BUFFER, triangle_vertex_position_buffer.gl_buffer)
     check_for_error()
-    vertices = eglfloats((
+    vertices = ctypes_floats((
         0.0,  1.0,  0.0,
        -1.0, -1.0,  0.0,
         1.0, -1.0,  0.0,
@@ -252,7 +155,7 @@ def init_buffers():
     square_vertex_position_buffer = Buffer()
     opengles.glBindBuffer(GL_ARRAY_BUFFER, square_vertex_position_buffer.gl_buffer)
     check_for_error()
-    vertices = eglfloats((
+    vertices = ctypes_floats((
         1.0,  1.0,  0.0,
        -1.0,  1.0,  0.0,
         1.0, -1.0,  0.0,
@@ -372,7 +275,9 @@ def main():
     egl = EGL()
     shader_program = init_shaders()
     triangle_vertex_position_buffer, square_vertex_position_buffer = init_buffers()
-    opengles.glClearColor(eglfloat(0.0), eglfloat(0.0), eglfloat(0.0), eglfloat(1.0))
+    opengles.glClearColor(
+        ctypes.c_float(0.0), ctypes.c_float(0.0), ctypes.c_float(0.0), ctypes.c_float(1.0)
+    )
     opengles.glEnable(GL_DEPTH_TEST)
     while True:
         draw_scene(

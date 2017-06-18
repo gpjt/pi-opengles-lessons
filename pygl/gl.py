@@ -84,5 +84,14 @@ class GL:
         return result
 
 
+    def bufferData(self, target, data, usage):
+        converted_data = (ctypes.c_float*len(data))(*data)
+        self.base_gl.bufferData(
+            target,
+            ctypes.sizeof(converted_data), ctypes.byref(converted_data),
+            usage
+        )
+
+
     def __getattr__(self, attr_name):
         return getattr(self.base_gl, attr_name)

@@ -95,24 +95,16 @@ class Buffer:
 
 
 
-def ctypes_floats(L):
-    return (ctypes.c_float*len(L))(*L)
-
-
 def init_buffers(gl): 
     triangle_vertex_position_buffer = Buffer(gl)
     gl.bindBuffer(gl.ARRAY_BUFFER, triangle_vertex_position_buffer.gl_buffer)
     gl.check_for_error()
-    vertices = ctypes_floats((
+    vertices = [
         0.0,  1.0,  0.0,
        -1.0, -1.0,  0.0,
         1.0, -1.0,  0.0,
-    ))
-    gl.bufferData(
-        gl.ARRAY_BUFFER, 
-        ctypes.sizeof(vertices), ctypes.byref(vertices),
-        gl.STATIC_DRAW
-    )
+    ]
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
     gl.check_for_error()
     triangle_vertex_position_buffer.item_size = 3
     triangle_vertex_position_buffer.num_items = 3
@@ -120,17 +112,13 @@ def init_buffers(gl):
     square_vertex_position_buffer = Buffer(gl)
     gl.bindBuffer(gl.ARRAY_BUFFER, square_vertex_position_buffer.gl_buffer)
     gl.check_for_error()
-    vertices = ctypes_floats((
+    vertices = [
         1.0,  1.0,  0.0,
        -1.0,  1.0,  0.0,
         1.0, -1.0,  0.0,
        -1.0, -1.0,  0.0
-    ))
-    gl.bufferData(
-        gl.ARRAY_BUFFER, 
-        ctypes.sizeof(vertices), ctypes.byref(vertices),
-        gl.STATIC_DRAW
-    )
+    ]
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
     gl.check_for_error()
     square_vertex_position_buffer.item_size = 3
     square_vertex_position_buffer.num_items = 4

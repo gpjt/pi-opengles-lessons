@@ -1,11 +1,3 @@
-#
-# Copyright (c) 2017 Giles Thomas
-# Copyright (c) 2012 Peter de Rivaz
-# 
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted.
-#
-
 import ctypes
 import numpy as np
 import time

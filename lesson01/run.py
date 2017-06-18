@@ -13,14 +13,14 @@ from pygl.egl import EGL
 from pygl.matrix_utils import perspective, translate
 
 
-FRAGMENT_SHADER = b"""
+FRAGMENT_SHADER = """
     precision mediump float;
     void main(void) {
         gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
     }
 """
 
-VERTEX_SHADER = b"""
+VERTEX_SHADER = """
     attribute vec3 aVertexPosition;
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
@@ -32,7 +32,7 @@ VERTEX_SHADER = b"""
 
 def create_shader(gl, code, shader_type):
     shader = gl.createShader(shader_type);
-    gl.shaderSource(shader, 1, ctypes.byref(ctypes.c_char_p(code)), 0)
+    gl.shaderSource(shader, code)
     gl.check_for_error()
     gl.compileShader(shader);
     gl.check_for_error()

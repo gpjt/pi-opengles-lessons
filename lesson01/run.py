@@ -68,18 +68,18 @@ def init_shaders(gl):
     gl.useProgram(shader_program.gl_program)
     gl.check_for_error()
     shader_program.vertex_position_attribute = gl.getAttribLocation(
-        shader_program.gl_program, b"aVertexPosition"
+        shader_program.gl_program, "aVertexPosition"
     )
     gl.check_for_error()
     gl.enableVertexAttribArray(shader_program.vertex_position_attribute)
     gl.check_for_error()
 
     shader_program.p_matrix_uniform = gl.getUniformLocation(
-        shader_program.gl_program, b"uPMatrix"
+        shader_program.gl_program, "uPMatrix"
     )
     gl.check_for_error()
     shader_program.mv_matrix_uniform = gl.getUniformLocation(
-        shader_program.gl_program, b"uMVMatrix"
+        shader_program.gl_program, "uMVMatrix"
     )
     gl.check_for_error()
 

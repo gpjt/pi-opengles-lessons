@@ -66,5 +66,17 @@ class GL:
         return log.value.decode("utf-8")
 
 
+    def getAttribLocation(self, program, attrib):
+        if isinstance(attrib, str):
+            attrib = attrib.encode("utf-8")
+        return self.base_gl.getAttribLocation(program, attrib)
+
+
+    def getUniformLocation(self, program, uniform):
+        if isinstance(uniform, str):
+            uniform = uniform.encode("utf-8")
+        return self.base_gl.getUniformLocation(program, uniform)
+
+
     def __getattr__(self, attr_name):
         return getattr(self.base_gl, attr_name)

@@ -37,10 +37,7 @@ def create_shader(gl, code, shader_type):
     gl.compileShader(shader);
     gl.check_for_error()
 
-    compile_status = ctypes.c_int()
-    gl.getShaderiv(shader, gl.COMPILE_STATUS, ctypes.byref(compile_status))
-    gl.check_for_error()
-    if compile_status == 0:
+    if not gl.getShaderParameter(shader, gl.COMPILE_STATUS):
         N = 1024
         log = (ctypes.c_char*N)()
         loglen = ctypes.c_int()

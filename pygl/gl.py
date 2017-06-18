@@ -35,8 +35,13 @@ class GL:
     def shaderSource(self, shader, source):
         if isinstance(source, str):
             source = source.encode("utf-8")
-        self.base_gl.shaderSource(shader, 1, ctypes.byref(ctypes.c_char_p(source)), 0) 
+        self.base_gl.shaderSource(shader, 1, ctypes.byref(ctypes.c_char_p(source)), 0)
 
+
+    def getShaderParameter(self, shader, parameter):
+        result = ctypes.c_int()
+        self.base_gl.getShaderiv(shader, parameter, ctypes.byref(result))
+        return result
 
 
     def __getattr__(self, attr_name):

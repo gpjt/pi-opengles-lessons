@@ -1,4 +1,5 @@
-import ctypes 
+import ctypes
+import numpy as np
 
 opengles = ctypes.CDLL('libGLESv2.so')
 
@@ -91,6 +92,14 @@ class GL:
             ctypes.sizeof(converted_data), ctypes.byref(converted_data),
             usage
         )
+
+
+    def uniformMatrix4fv(self, location, transpose, value):
+        if transpose != False:
+            raise ValueError("Transpose must be False -- see OpenGL spec")
+        if isinstance(value, np.ndarray):
+            value = np.ascontiguousarray(value, dtype=np.float32).ctypes.data
+        self.base_gl.uniformMatrix4fv(location, 1, transpose, value)
 
 
     def __getattr__(self, attr_name):

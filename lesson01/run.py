@@ -148,15 +148,9 @@ def draw_scene(
         triangle_vertex_position_buffer.item_size, gl.FLOAT, False, 0, 0
     )
     gl.check_for_error()
-    gl.uniformMatrix4fv(
-        shader_program.p_matrix_uniform, 1, False, 
-        np.ascontiguousarray(p_matrix.T, dtype=np.float32).ctypes.data
-    )
+    gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix.T)
     gl.check_for_error()
-    gl.uniformMatrix4fv(
-        shader_program.mv_matrix_uniform, 1, False,
-        np.ascontiguousarray(mv_matrix.T, dtype=np.float32).ctypes.data
-    )
+    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, mv_matrix.T)
     gl.check_for_error()
     gl.drawArrays(gl.TRIANGLES, 0, triangle_vertex_position_buffer.num_items)
     gl.check_for_error()
@@ -169,15 +163,9 @@ def draw_scene(
         square_vertex_position_buffer.item_size, gl.FLOAT, False, 0, 0
     )
     gl.check_for_error()
-    gl.uniformMatrix4fv(
-        shader_program.p_matrix_uniform, 1, False, 
-        np.ascontiguousarray(p_matrix.T, dtype=np.float32).ctypes.data
-    )
+    gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix.T)
     gl.check_for_error()
-    gl.uniformMatrix4fv(
-        shader_program.mv_matrix_uniform, 1, False,
-        np.ascontiguousarray(mv_matrix.T, dtype=np.float32).ctypes.data
-    )
+    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, mv_matrix.T)
     gl.check_for_error()
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, square_vertex_position_buffer.num_items)
     gl.check_for_error()

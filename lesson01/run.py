@@ -149,15 +149,19 @@ VERTEX_SHADER = b"""
 def create_shader(code, shader_type):
     shader = opengles.glCreateShader(shader_type);
     opengles.glShaderSource(shader, 1, ctypes.byref(ctypes.c_char_p(code)), 0)
+    check_for_error()
     opengles.glCompileShader(shader);
+    check_for_error()
 
     compile_status = ctypes.c_int()
     opengles.glGetShaderiv(shader, GL_COMPILE_STATUS, ctypes.byref(compile_status))
+    check_for_error()
     if compile_status == 0:
         N = 1024
         log = (ctypes.c_char*N)()
         loglen = ctypes.c_int()
         opengles.glGetShaderInfoLog(shader, N, ctypes.byref(loglen), ctypes.byref(log))
+        check_for_error()
         raise Exception("Shader compile error: {}".format(log.value))
 
     return shader
@@ -174,13 +178,17 @@ def init_shaders():
 
     shader_program = Program()
     opengles.glAttachShader(shader_program.gl_program, vertex_shader)
+    check_for_error()
     opengles.glAttachShader(shader_program.gl_program, fragment_shader)
+    check_for_error()
     opengles.glLinkProgram(shader_program.gl_program)
+    check_for_error()
 
     link_status = ctypes.c_int()
     opengles.glGetProgramiv(
         shader_program.gl_program, GL_LINK_STATUS, ctypes.byref(link_status)
     )
+    check_for_error()
     if link_status == 0:
         N = 1024
         log = (ctypes.c_char*N)()
@@ -188,20 +196,26 @@ def init_shaders():
         opengles.glGetProgramInfoLog(
             shader_program.gl_program, N, ctypes.byref(loglen),ctypes.byref(log)
         )
+        check_for_error()
         raise Exception("Program link error: {}".format(log.value))
 
     opengles.glUseProgram(shader_program.gl_program)
+    check_for_error()
     shader_program.vertex_position_attribute = opengles.glGetAttribLocation(
-        shader_program.gl_program, "aVertexPosition"
+        shader_program.gl_program, b"aVertexPosition"
     )
+    check_for_error()
     opengles.glEnableVertexAttribArray(shader_program.vertex_position_attribute)
+    check_for_error()
 
     shader_program.p_matrix_uniform = opengles.glGetUniformLocation(
-        shader_program.gl_program, "uPMatrix"
+        shader_program.gl_program, b"uPMatrix"
     )
+    check_for_error()
     shader_program.mv_matrix_uniform = opengles.glGetUniformLocation(
-        shader_program.gl_program, "uMVMatrix"
+        shader_program.gl_program, b"uMVMatrix"
     )
+    check_for_error()
 
     return shader_program
 
@@ -212,12 +226,14 @@ class Buffer:
     def __init__(self):
         self.egl_buffer = eglint()
         opengles.glGenBuffers(1, ctypes.byref(self.egl_buffer))
+        check_for_error()
         
 
 
 def init_buffers(): 
     triangle_vertex_position_buffer = Buffer()
     opengles.glBindBuffer(GL_ARRAY_BUFFER, triangle_vertex_position_buffer.egl_buffer)
+    check_for_error()
     vertices = eglfloats((
         0.0,  1.0,  0.0,
        -1.0, -1.0,  0.0,
@@ -228,11 +244,13 @@ def init_buffers():
         ctypes.sizeof(vertices), ctypes.byref(vertices),
         GL_STATIC_DRAW
     )
+    check_for_error()
     triangle_vertex_position_buffer.item_size = 3
     triangle_vertex_position_buffer.num_items = 3
 
     square_vertex_position_buffer = Buffer()
     opengles.glBindBuffer(GL_ARRAY_BUFFER, square_vertex_position_buffer.egl_buffer)
+    check_for_error()
     vertices = eglfloats((
         1.0,  1.0,  0.0,
        -1.0,  1.0,  0.0,
@@ -244,6 +262,7 @@ def init_buffers():
         ctypes.sizeof(vertices), ctypes.byref(vertices),
         GL_STATIC_DRAW
     )
+    check_for_error()
     square_vertex_position_buffer.item_size = 3
     square_vertex_position_buffer.num_items = 4
 
@@ -260,6 +279,7 @@ def draw_scene(
     egl, shader_program, triangle_vertex_position_buffer, square_vertex_position_buffer
 ):
     opengles.glBindFramebuffer(GL_FRAMEBUFFER, 0)
+    check_for_error()
     opengles.glViewport(0, 0, egl.width, egl.height)
     check_for_error()
 

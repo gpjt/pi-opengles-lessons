@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 from pygl.egl import EGL
-from pygl.matrix_utils import perspective, rotate, translate
+from matrix_utils import perspective, rotate, translate
 
 
 FRAGMENT_SHADER = """

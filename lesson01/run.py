@@ -38,12 +38,8 @@ def create_shader(gl, code, shader_type):
     gl.check_for_error()
 
     if not gl.getShaderParameter(shader, gl.COMPILE_STATUS):
-        N = 1024
-        log = (ctypes.c_char*N)()
-        loglen = ctypes.c_int()
-        gl.getShaderInfoLog(shader, N, ctypes.byref(loglen), ctypes.byref(log))
-        gl.check_for_error()
-        raise Exception("Shader compile error: {}".format(log.value))
+        log = gl.getShaderInfoLog(shader)
+        raise Exception("Shader compile error: {}".format(log))
 
     return shader
     

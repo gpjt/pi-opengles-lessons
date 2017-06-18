@@ -44,5 +44,13 @@ class GL:
         return result
 
 
+    def getShaderInfoLog(self, shader):
+        N = 1024
+        log = (ctypes.c_char*N)()
+        loglen = ctypes.c_int()
+        self.base_gl.getShaderInfoLog(shader, N, ctypes.byref(loglen), ctypes.byref(log))
+        return log.value.decode("utf-8")
+
+
     def __getattr__(self, attr_name):
         return getattr(self.base_gl, attr_name)

@@ -78,5 +78,11 @@ class GL:
         return self.base_gl.getUniformLocation(program, uniform)
 
 
+    def createBuffer(self):
+        result = ctypes.c_int()
+        self.base_gl.genBuffers(1, ctypes.byref(result))
+        return result
+
+
     def __getattr__(self, attr_name):
         return getattr(self.base_gl, attr_name)

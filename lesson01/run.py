@@ -90,10 +90,10 @@ def init_shaders(gl):
 class Buffer:
 
     def __init__(self, gl):
-        self.gl_buffer = ctypes.c_int()
-        gl.genBuffers(1, ctypes.byref(self.gl_buffer))
+        self.gl_buffer = gl.createBuffer()
         gl.check_for_error()
-        
+
+
 
 def ctypes_floats(L):
     return (ctypes.c_float*len(L))(*L)

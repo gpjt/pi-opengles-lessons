@@ -9,6 +9,7 @@
 import ctypes
 import time
 import math
+import numpy as np
 
 # Pick up our constants extracted from the header files with prepare_constants.py
 from egl import *
@@ -274,6 +275,30 @@ def check_for_error():
     if e:
         raise Exception("GL error {}".format(hex(e)))
 
+def perspective(fovy, aspect, n, f):
+    s = 1.0 / math.tan(math.radians(fovy) / 2.0)
+    sx, sy = s / aspect, s
+    zz = (f+n) / (n-f)
+    zw = 2 * f * n / (n-f)
+    return np.matrix([
+        [sx,  0,  0, 0],
+        [0,  sy,  0, 0],
+        [0,   0, zz,zw],
+        [0,   0, -1, 0]
+    ])
+
+
+def translate(xyz):
+    x, y, z = xyz
+    return np.matrix([
+        [1,0,0,x],
+        [0,1,0,y],
+        [0,0,1,z],
+        [0,0,0,1]
+    ])
+
+
+
 
 def draw_scene(
     egl, shader_program, triangle_vertex_position_buffer, square_vertex_position_buffer
@@ -286,8 +311,10 @@ def draw_scene(
     opengles.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     check_for_error()
 
-    # Need to set up matrices here
-    
+    p_matrix = perspective(45, float(egl.width.value) / float(egl.height.value), 0.1, 100.0)
+    mv_matrix = np.identity(4)
+
+    mv_matrix = mv_matrix * translate([-1.5, 0.0, -7.0])
     opengles.glBindBuffer(GL_ARRAY_BUFFER, triangle_vertex_position_buffer.egl_buffer)
     check_for_error()
     opengles.glVertexAttribPointer(
@@ -295,12 +322,20 @@ def draw_scene(
         triangle_vertex_position_buffer.item_size, GL_FLOAT, False, 0, 0
     )
     check_for_error()
-    # Need to set uniforms
+    opengles.glUniformMatrix4fv(
+        shader_program.p_matrix_uniform, 1, False, 
+        p_matrix.ctypes.data
+    )
+    check_for_error()
+    opengles.glUniformMatrix4fv(
+        shader_program.mv_matrix_uniform, 1, False,
+        mv_matrix.ctypes.data
+    )
+    check_for_error()
     opengles.glDrawArrays(GL_TRIANGLES, 0, triangle_vertex_position_buffer.num_items)
     check_for_error()
 
-    # Shift matrix 
-
+    mv_matrix = mv_matrix * translate([3.0, 0.0, 0.0])
     opengles.glBindBuffer(GL_ARRAY_BUFFER, square_vertex_position_buffer.egl_buffer)
     check_for_error()
     opengles.glVertexAttribPointer(
@@ -308,7 +343,16 @@ def draw_scene(
         square_vertex_position_buffer.item_size, GL_FLOAT, False, 0, 0
     )
     check_for_error()
-    # Need to set uniforms
+    opengles.glUniformMatrix4fv(
+        shader_program.p_matrix_uniform, 1, False, 
+        p_matrix.ctypes.data
+    )
+    check_for_error()
+    opengles.glUniformMatrix4fv(
+        shader_program.mv_matrix_uniform, 1, False,
+        mv_matrix.ctypes.data
+    )
+    check_for_error()
     opengles.glDrawArrays(GL_TRIANGLE_STRIP, 0, square_vertex_position_buffer.num_items)
     check_for_error()
 

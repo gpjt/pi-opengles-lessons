@@ -137,9 +137,6 @@ def draw_scene(
 
     gl.bindBuffer(gl.ARRAY_BUFFER, 0);
 
-    gl.flush()
-    gl.finish()
-
     egl.swap_buffers()
 
 

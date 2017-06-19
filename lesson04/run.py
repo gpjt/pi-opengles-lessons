@@ -252,9 +252,6 @@ def draw_scene(egl, gl, shader_program, pyramid_shape, cube_shape):
     gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, cube_mv_matrix.T)
     gl.drawElements(gl.TRIANGLES, cube_shape.num_indices, gl.UNSIGNED_SHORT, 0)
 
-    gl.flush()
-    gl.finish()
-
     egl.swap_buffers()
 
 

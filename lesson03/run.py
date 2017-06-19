@@ -178,9 +178,6 @@ def draw_scene(egl, gl, shader_program, triangle_shape, square_shape):
 
     gl.bindBuffer(gl.ARRAY_BUFFER, 0);
 
-    gl.flush()
-    gl.finish()
-
     egl.swap_buffers()
 
 

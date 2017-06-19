@@ -257,7 +257,7 @@ def draw_scene(egl, gl, shader_program, pyramid_shape, cube_shape):
 
 def animate(pyramid_shape, cube_shape):
     pyramid_shape.angle = (pyramid_shape.angle + 1) % 360
-    cube_shape.angle = (cube_shape.angle + 1) % 360
+    cube_shape.angle = (cube_shape.angle - 0.8) % 360
 
 
 def main():

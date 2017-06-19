@@ -1,4 +1,5 @@
 import ctypes
+import platform
 
 # Pick up our constants extracted from the header files with prepare_constants.py
 from pygl import egl_constants
@@ -12,32 +13,56 @@ egl_constants.DISPMANX_PROTECTION_NONE = 0
 
 from pygl.gl import GL
 
+PLATFORM_PI = "pi"
+PLATFORM_LINUX = "linux"
+if platform.system().lower() != "linux":
+    raise Exception("Linux-only right now :-(")
+platform = PLATFORM_LINUX
 
 # Open the libraries
-bcm = ctypes.CDLL('libbcm_host.so')
+try:
+    bcm = ctypes.CDLL("libbcm_host.so")
+    platform = PLATFORM_PI
+except OSError:
+    libX11 = ctypes.CDLL("libX11.so")
+
 opengles = ctypes.CDLL('libGLESv2.so')
 openegl = ctypes.CDLL('libEGL.so')
 
 eglint = ctypes.c_int
 
+
 def eglints(L):
-    """Converts a tuple to an array of eglints (would a pointer return be better?)"""
-    return (eglint*len(L))(*L)
+    return (eglint * len(L))(*L)
 
 
 class EGL(object):
 
     def __init__(self):
-        """Opens up the OpenGL library and prepares a window for display"""
-        b = bcm.bcm_host_init()
-        if b != 0:
-            raise Exception("Could not initialize Pi GPU")
+        if platform == PLATFORM_PI:
+            b = bcm.bcm_host_init()
+            if b != 0:
+                raise Exception("Could not initialize Pi GPU")
+
+            width = eglint()
+            height = eglint()
+            s = bcm.graphics_get_display_size(0, ctypes.byref(width), ctypes.byref(height))
+            self.width = width
+            self.height = height
+            if s < 0:
+                raise Exception("Could not get display size")
+
+        elif platform == PLATFORM_LINUX:
+            display = libX11.XOpenDisplay(None)
+            screen = libX11.XDefaultScreenOfDisplay(display)
+            self.width = libX11.XWidthOfScreen(screen)
+            self.height = libX11.XHeightOfScreen(screen)
 
         self.display = openegl.eglGetDisplay(egl_constants.EGL_DEFAULT_DISPLAY)
         if self.display == 0:
             raise Exception("Could not open EGL display")
 
-        if openegl.eglInitialize(self.display, 0, 0) == 0:
+        if openegl.eglInitialize(self.display, 0, 0) == egl_constants.EGL_NO_DISPLAY:
             raise Exception("Could not initialise EGL")
 
         attribute_list = eglints((
@@ -48,7 +73,7 @@ class EGL(object):
             egl_constants.EGL_SURFACE_TYPE, egl_constants.EGL_WINDOW_BIT,
             egl_constants.EGL_NONE
         ))
-                                                                    
+
         numconfig = eglint()
         config = ctypes.c_void_p()
         r = openegl.eglChooseConfig(
@@ -73,13 +98,6 @@ class EGL(object):
         if self.context == egl_constants.EGL_NO_CONTEXT:
             raise Exception("Could not create EGL context")
 
-        width = eglint()
-        height = eglint()
-        s = bcm.graphics_get_display_size(0, ctypes.byref(width),ctypes.byref(height))
-        self.width = width
-        self.height = height
-        if s < 0:
-            raise Exception("Could not get display size")
 
         dispman_display = bcm.vc_dispmanx_display_open(0)
         if dispman_display == 0:
@@ -90,7 +108,7 @@ class EGL(object):
             raise Exception("Could not start updating display")
 
         dst_rect = eglints((0, 0, width.value, height.value))
-        src_rect = eglints((0, 0, width.value<<16, height.value<<16))
+        src_rect = eglints((0, 0, width.value << 16, height.value << 16))
         dispman_element = bcm.vc_dispmanx_element_add(
             dispman_update, dispman_display,
             0, ctypes.byref(dst_rect), 0,
@@ -107,7 +125,7 @@ class EGL(object):
         if self.surface == egl_constants.EGL_NO_SURFACE:
             raise Exception("Could not create surface")
 
-        r = openegl.eglMakeCurrent(self.display, self.surface, self.surface, self.context) 
+        r = openegl.eglMakeCurrent(self.display, self.surface, self.surface, self.context)
         if r == 0:
             raise Exception("Could not make our surface current")
 

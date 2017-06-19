@@ -191,10 +191,10 @@ def main():
     gl = egl.get_context()
     shader_program = init_shaders(gl)
     triangle_shape, square_shape = init_buffers(gl)
-    gl.ClearColor(
+    gl.clearColor(
         ctypes.c_float(0.0), ctypes.c_float(0.0), ctypes.c_float(0.0), ctypes.c_float(1.0)
     )
-    gl.Enable(gl.DEPTH_TEST)
+    gl.enable(gl.DEPTH_TEST)
     while True:
         start = time.time()
         draw_scene(egl, gl, shader_program, triangle_shape, square_shape)

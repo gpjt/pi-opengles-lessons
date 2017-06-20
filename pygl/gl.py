@@ -86,7 +86,22 @@ class GL:
 
 
     def bufferData(self, target, data, usage):
-        converted_data = (ctypes.c_float*len(data))(*data)
+        data_type = None
+        for item in data:
+            if data_type is None:
+                data_type = type(item)
+            elif type(item) != data_type:
+                raise Exception(
+                    "Found element of type {} when first was {}".format(type(item), data_type)
+                )
+
+        if data_type == float:
+            converted_data = (ctypes.c_float*len(data))(*data)
+        elif data_type == int:
+            converted_data = (ctypes.c_short*len(data))(*data)
+        else:
+            raise Exception("I don't know how to convert type {}".format(data_type))
+
         self.base_gl.bufferData(
             target,
             ctypes.sizeof(converted_data), ctypes.byref(converted_data),
@@ -98,7 +113,7 @@ class GL:
         if transpose != False:
             raise ValueError("Transpose must be False -- see OpenGL spec")
         if isinstance(value, np.ndarray):
-            value = np.ascontiguousarray(value, dtype=np.float32).ctypes.data
+            value = np.asfortranarray(value, dtype=np.float32).ctypes.data
         self.base_gl.uniformMatrix4fv(location, 1, transpose, value)
 
 

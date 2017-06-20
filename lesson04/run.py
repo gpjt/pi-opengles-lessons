@@ -1,9 +1,9 @@
-import ctypes
 import numpy as np
 import time
 
 from pygl.egl import EGL
 from matrix_utils import perspective, rotate, translate
+
 
 
 FRAGMENT_SHADER = """
@@ -265,9 +265,7 @@ def main():
     gl = egl.get_context()
     shader_program = init_shaders(gl)
     pyramid_shape, cube_shape = init_buffers(gl)
-    gl.clearColor(
-        ctypes.c_float(0.0), ctypes.c_float(0.0), ctypes.c_float(0.0), ctypes.c_float(1.0)
-    )
+    gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.enable(gl.DEPTH_TEST)
     while True:
         start = time.time()

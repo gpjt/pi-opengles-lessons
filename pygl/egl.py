@@ -55,8 +55,8 @@ class EGL(object):
         elif platform == PLATFORM_LINUX:
             display = libX11.XOpenDisplay(None)
             screen = libX11.XDefaultScreenOfDisplay(display)
-            self.width = libX11.XWidthOfScreen(screen)
-            self.height = libX11.XHeightOfScreen(screen)
+            self.width = ctypes.c_int(libX11.XWidthOfScreen(screen))
+            self.height = ctypes.c_int(libX11.XHeightOfScreen(screen))
 
         self.display = openegl.eglGetDisplay(egl_constants.EGL_DEFAULT_DISPLAY)
         if self.display == 0:
@@ -99,31 +99,36 @@ class EGL(object):
             raise Exception("Could not create EGL context")
 
 
-        dispman_display = bcm.vc_dispmanx_display_open(0)
-        if dispman_display == 0:
-            raise Exception("Could not open display")
+        if platform == PLATFORM_PI:
+            dispman_display = bcm.vc_dispmanx_display_open(0)
+            if dispman_display == 0:
+                raise Exception("Could not open display")
 
-        dispman_update = bcm.vc_dispmanx_update_start(0)
-        if dispman_update == 0:
-            raise Exception("Could not start updating display")
+            dispman_update = bcm.vc_dispmanx_update_start(0)
+            if dispman_update == 0:
+                raise Exception("Could not start updating display")
 
-        dst_rect = eglints((0, 0, width.value, height.value))
-        src_rect = eglints((0, 0, width.value << 16, height.value << 16))
-        dispman_element = bcm.vc_dispmanx_element_add(
-            dispman_update, dispman_display,
-            0, ctypes.byref(dst_rect), 0,
-            ctypes.byref(src_rect),
-            egl_constants.DISPMANX_PROTECTION_NONE,
-            0, 0, 0
-        )
-        bcm.vc_dispmanx_update_submit_sync(dispman_update)
+            dst_rect = eglints((0, 0, width.value, height.value))
+            src_rect = eglints((0, 0, width.value << 16, height.value << 16))
+            dispman_element = bcm.vc_dispmanx_element_add(
+                dispman_update, dispman_display,
+                0, ctypes.byref(dst_rect), 0,
+                ctypes.byref(src_rect),
+                egl_constants.DISPMANX_PROTECTION_NONE,
+                0, 0, 0
+            )
+            bcm.vc_dispmanx_update_submit_sync(dispman_update)
 
-        nativewindow = eglints((dispman_element, width, height))
-        nw_p = ctypes.pointer(nativewindow)
-        self.nw_p = nw_p
-        self.surface = openegl.eglCreateWindowSurface(self.display, config, nw_p, 0)
-        if self.surface == egl_constants.EGL_NO_SURFACE:
-            raise Exception("Could not create surface")
+            nativewindow = eglints((dispman_element, width, height))
+            nw_p = ctypes.pointer(nativewindow)
+            self.nw_p = nw_p
+            self.surface = openegl.eglCreateWindowSurface(self.display, config, nw_p, 0)
+            if self.surface == egl_constants.EGL_NO_SURFACE:
+                raise Exception("Could not create surface")
+        elif platform == PLATFORM_LINUX:
+            root = libX11.XRootWindowOfScreen(screen)
+            window = libX11.XCreateSimpleWindow(display, root, 0, 0, self.width.value, self.height.value, 1, 0, 0)
+            self.surface = openegl.eglCreateWindowSurface(display, config, window, 0)
 
         r = openegl.eglMakeCurrent(self.display, self.surface, self.surface, self.context)
         if r == 0:

@@ -121,8 +121,8 @@ def draw_scene(
         shader_program.vertex_position_attribute, 
         triangle_shape.item_size, gl.FLOAT, False, 0, 0
     )
-    gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix.T)
-    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, mv_matrix.T)
+    gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix)
+    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, mv_matrix)
     gl.drawArrays(gl.TRIANGLES, 0, triangle_shape.num_items)
 
     mv_matrix = mv_matrix * translate([3.0, 0.0, 0.0])
@@ -131,8 +131,8 @@ def draw_scene(
         shader_program.vertex_position_attribute,
         square_shape.item_size, gl.FLOAT, False, 0, 0
     )
-    gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix.T)
-    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, mv_matrix.T)
+    gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix)
+    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, mv_matrix)
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, square_shape.num_items)
 
     gl.bindBuffer(gl.ARRAY_BUFFER, 0);

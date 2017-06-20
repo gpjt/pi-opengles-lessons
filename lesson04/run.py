@@ -230,9 +230,9 @@ def draw_scene(egl, gl, shader_program, pyramid_shape, cube_shape):
         shader_program.vertex_color_attribute,
         pyramid_shape.color_item_size, gl.FLOAT, False, 0, 0
     )
-    gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix.T)
+    gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix)
     pyramid_mv_matrix = mv_matrix * rotate(pyramid_shape.angle, np.array([0, 1, 0]))
-    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, pyramid_mv_matrix.T)
+    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, pyramid_mv_matrix)
     gl.drawArrays(gl.TRIANGLES, 0, pyramid_shape.num_vertices)
 
     mv_matrix = mv_matrix * translate([3.0, 0.0, 0.0])
@@ -247,9 +247,9 @@ def draw_scene(egl, gl, shader_program, pyramid_shape, cube_shape):
         cube_shape.color_item_size, gl.FLOAT, False, 0, 0
     )
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube_shape.index_buffer)
-    gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix.T)
+    gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix)
     cube_mv_matrix =  mv_matrix * rotate(cube_shape.angle, np.array([1, 1, 1]))
-    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, cube_mv_matrix.T)
+    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, cube_mv_matrix)
     gl.drawElements(gl.TRIANGLES, cube_shape.num_indices, gl.UNSIGNED_SHORT, 0)
 
     egl.swap_buffers()

@@ -155,9 +155,9 @@ def draw_scene(egl, gl, shader_program, triangle_shape, square_shape):
         shader_program.vertex_color_attribute,
         triangle_shape.color_item_size, gl.FLOAT, False, 0, 0
     )
-    gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix.T)
+    gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix)
     triangle_mv_matrix = mv_matrix * rotate(triangle_shape.angle, np.array([0, 1, 0]))
-    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, triangle_mv_matrix.T)
+    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, triangle_mv_matrix)
     gl.drawArrays(gl.TRIANGLES, 0, triangle_shape.num_items)
 
     mv_matrix = mv_matrix * translate([3.0, 0.0, 0.0])
@@ -171,9 +171,9 @@ def draw_scene(egl, gl, shader_program, triangle_shape, square_shape):
         shader_program.vertex_color_attribute,
         square_shape.color_item_size, gl.FLOAT, False, 0, 0
     )
-    gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix.T)
+    gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix)
     square_mv_matrix =  mv_matrix * rotate(square_shape.angle, np.array([1, 0, 0]))
-    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, square_mv_matrix.T)
+    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, square_mv_matrix)
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, square_shape.num_items)
 
     gl.bindBuffer(gl.ARRAY_BUFFER, 0);

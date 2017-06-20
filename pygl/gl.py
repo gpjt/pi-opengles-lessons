@@ -113,7 +113,7 @@ class GL:
         if transpose != False:
             raise ValueError("Transpose must be False -- see OpenGL spec")
         if isinstance(value, np.ndarray):
-            value = np.ascontiguousarray(value, dtype=np.float32).ctypes.data
+            value = np.asfortranarray(value, dtype=np.float32).ctypes.data
         self.base_gl.uniformMatrix4fv(location, 1, transpose, value)
 
 

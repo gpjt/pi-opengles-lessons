@@ -47,19 +47,20 @@ class EGL(object):
             width = eglint()
             height = eglint()
             s = bcm.graphics_get_display_size(0, ctypes.byref(width), ctypes.byref(height))
-            self.width = width
-            self.height = height
             if s < 0:
                 raise Exception("Could not get display size")
+            self.width = width
+            self.height = height
 
         elif platform == PLATFORM_LINUX:
+            print("Linux, opening display")
             display = libX11.XOpenDisplay(None)
             screen = libX11.XDefaultScreenOfDisplay(display)
             self.width = ctypes.c_int(libX11.XWidthOfScreen(screen))
             self.height = ctypes.c_int(libX11.XHeightOfScreen(screen))
 
         self.display = openegl.eglGetDisplay(egl_constants.EGL_DEFAULT_DISPLAY)
-        if self.display == 0:
+        if self.display == egl_constants.EGL_NO_DISPLAY:
             raise Exception("Could not open EGL display")
 
         if openegl.eglInitialize(self.display, 0, 0) == egl_constants.EGL_NO_DISPLAY:
@@ -127,8 +128,17 @@ class EGL(object):
             if self.surface == egl_constants.EGL_NO_SURFACE:
                 raise Exception("Could not create surface")
         elif platform == PLATFORM_LINUX:
+            print("Linux, creating surface")
             root = libX11.XRootWindowOfScreen(screen)
+            print("width={}, height={}".format(self.width, self.height))
             window = libX11.XCreateSimpleWindow(display, root, 0, 0, self.width.value, self.height.value, 1, 0, 0)
+            s = ctypes.create_string_buffer(b'WM_DELETE_WINDOW')
+            WM_DELETE_WINDOW = ctypes.c_ulong(libX11.XInternAtom(display, s, 0))
+            libX11.XSetWMProtocols(display, window, ctypes.byref(WM_DELETE_WINDOW), 1)
+            KeyPressMask =   (1<<0)
+            KeyReleaseMask =   (1<<1)
+            libX11.XSelectInput(display, window, KeyPressMask | KeyReleaseMask)
+            libX11.XMapWindow(display, window)
             self.surface = openegl.eglCreateWindowSurface(display, config, window, 0)
 
         r = openegl.eglMakeCurrent(self.display, self.surface, self.surface, self.context)

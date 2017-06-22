@@ -1,4 +1,3 @@
-import ctypes
 import numpy as np
 from PIL import Image
 import time
@@ -95,10 +94,12 @@ def init_texture(gl):
     image = image.transpose(Image.FLIP_TOP_BOTTOM)
     image_data = np.array(image.convert("RGBA"))
 
-    texture = ctypes.c_uint()
-    gl.genTextures(1, ctypes.byref(texture))
+    texture = gl.createTexture()
     gl.bindTexture(gl.TEXTURE_2D, texture)
-    gl.texImage2D(gl.TEXTURE_2D, ctypes.c_int(0), gl.RGBA, ctypes.c_int(image.width), ctypes.c_int(image.height), ctypes.c_int(0), gl.RGBA, gl.UNSIGNED_BYTE, image_data.ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)))
+    gl.texImage2D(
+        gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height,
+        0, gl.RGBA, gl.UNSIGNED_BYTE, image_data
+    )
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
     gl.bindTexture(gl.TEXTURE_2D, None)

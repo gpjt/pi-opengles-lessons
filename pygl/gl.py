@@ -129,5 +129,23 @@ class GL:
         self.base_gl.uniformMatrix4fv(location, 1, transpose, value)
 
 
+    def createTexture(self):
+        texture = ctypes.c_uint()
+        self.base_gl.genTextures(1, ctypes.byref(texture))
+        return texture.value
+
+
+    def texImage2D(
+        self, target, level, internal_format, width, height, border, format, type, data
+    ):
+        if isinstance(data, np.ndarray):
+            data = data.ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte))
+        self.base_gl.texImage2D(
+            target, ctypes.c_int(level), internal_format,
+            ctypes.c_int(width), ctypes.c_int(height), ctypes.c_int(border),
+            format, type, data
+        )
+
+
     def __getattr__(self, attr_name):
         return getattr(self.base_gl, attr_name)

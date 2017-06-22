@@ -148,6 +148,7 @@ def main():
     gl.enable(gl.DEPTH_TEST)
     while True:
         start = time.time()
+        egl.pump()
         draw_scene(
             egl, gl, shader_program,
             triangle_shape,

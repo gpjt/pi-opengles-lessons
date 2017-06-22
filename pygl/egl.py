@@ -24,7 +24,7 @@ try:
     bcm = ctypes.CDLL("libbcm_host.so")
     platform = PLATFORM_PI
 except OSError:
-    libX11 = ctypes.CDLL("libX11.so")
+    from pyxlib import xlib
 
 opengles = ctypes.CDLL('libGLESv2.so')
 openegl = ctypes.CDLL('libEGL.so')
@@ -54,10 +54,10 @@ class EGL(object):
 
         elif platform == PLATFORM_LINUX:
             print("Linux, opening display")
-            display = libX11.XOpenDisplay(None)
-            screen = libX11.XDefaultScreenOfDisplay(display)
-            self.width = ctypes.c_int(libX11.XWidthOfScreen(screen))
-            self.height = ctypes.c_int(libX11.XHeightOfScreen(screen))
+            self.x_display = xlib.XOpenDisplay(None)
+            screen = xlib.XDefaultScreenOfDisplay(self.x_display)
+            self.width = ctypes.c_int(xlib.XWidthOfScreen(screen))
+            self.height = ctypes.c_int(xlib.XHeightOfScreen(screen))
 
         self.display = openegl.eglGetDisplay(egl_constants.EGL_DEFAULT_DISPLAY)
         if self.display == egl_constants.EGL_NO_DISPLAY:
@@ -129,21 +129,31 @@ class EGL(object):
                 raise Exception("Could not create surface")
         elif platform == PLATFORM_LINUX:
             print("Linux, creating surface")
-            root = libX11.XRootWindowOfScreen(screen)
+            root = xlib.XRootWindowOfScreen(screen)
             print("width={}, height={}".format(self.width, self.height))
-            window = libX11.XCreateSimpleWindow(display, root, 0, 0, self.width.value, self.height.value, 1, 0, 0)
+            window = xlib.XCreateSimpleWindow(self.x_display, root, 0, 0, self.width.value, self.height.value, 1, 0, 0)
             s = ctypes.create_string_buffer(b'WM_DELETE_WINDOW')
-            WM_DELETE_WINDOW = ctypes.c_ulong(libX11.XInternAtom(display, s, 0))
-            libX11.XSetWMProtocols(display, window, ctypes.byref(WM_DELETE_WINDOW), 1)
+            WM_DELETE_WINDOW = ctypes.c_ulong(xlib.XInternAtom(self.x_display, s, 0))
+            xlib.XSetWMProtocols(self.x_display, window, ctypes.byref(WM_DELETE_WINDOW), 1)
             KeyPressMask =   (1<<0)
             KeyReleaseMask =   (1<<1)
-            libX11.XSelectInput(display, window, KeyPressMask | KeyReleaseMask)
-            libX11.XMapWindow(display, window)
-            self.surface = openegl.eglCreateWindowSurface(display, config, window, 0)
+            xlib.XSelectInput(self.x_display, window, KeyPressMask | KeyReleaseMask)
+            xlib.XMapWindow(self.x_display, window)
+            self.surface = openegl.eglCreateWindowSurface(self.x_display, config, window, 0)
 
         r = openegl.eglMakeCurrent(self.display, self.surface, self.surface, self.context)
         if r == 0:
             raise Exception("Could not make our surface current")
+
+
+    def pump(self):
+        if platform == PLATFORM_PI:
+            return
+
+        event = xlib.XEvent()
+        n = xlib.XEventsQueued(self.x_display, xlib.QueuedAfterFlush)
+        for ii in range(n):
+            xlib.XNextEvent(self.x_display, event)
 
 
     def get_context(self):

@@ -59,11 +59,8 @@ def init_shaders(gl):
 
     shader_program = Program(gl)
     gl.attachShader(shader_program.gl_program, vertex_shader)
-    gl.check_for_error()
     gl.attachShader(shader_program.gl_program, fragment_shader)
-    gl.check_for_error()
     gl.linkProgram(shader_program.gl_program)
-    gl.check_for_error()
 
     if gl.getProgramParameter(shader_program.gl_program, gl.LINK_STATUS) == 0:
         log = gl.getProgramInfoLog(shader_program.gl_program)
@@ -73,16 +70,12 @@ def init_shaders(gl):
     shader_program.vertex_position_attribute = gl.getAttribLocation(
         shader_program.gl_program, "aVertexPosition"
     )
-    gl.check_for_error()
     gl.enableVertexAttribArray(shader_program.vertex_position_attribute)
-    gl.check_for_error()
 
     shader_program.texture_coord_attribute = gl.getAttribLocation(
         shader_program.gl_program, "aTextureCoord"
     )
-    gl.check_for_error()
     gl.enableVertexAttribArray(shader_program.texture_coord_attribute)
-    gl.check_for_error()
 
     shader_program.p_matrix_uniform = gl.getUniformLocation(
         shader_program.gl_program, "uPMatrix"
@@ -93,7 +86,6 @@ def init_shaders(gl):
     shader_program.sampler_uniform = gl.getUniformLocation(
         shader_program.gl_program, "uSampler"
     )
-    gl.check_for_error()
 
     return shader_program
 
@@ -105,15 +97,10 @@ def init_texture(gl):
     texture = ctypes.c_uint()
     gl.genTextures(1, ctypes.byref(texture))
     gl.bindTexture(gl.TEXTURE_2D, texture)
-    gl.check_for_error()
     gl.texImage2D(gl.TEXTURE_2D, ctypes.c_int(0), gl.RGBA, ctypes.c_int(image.width), ctypes.c_int(image.height), ctypes.c_int(0), gl.RGBA, gl.UNSIGNED_BYTE, image_data.ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)))
-    gl.check_for_error()
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-    gl.check_for_error()
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-    gl.check_for_error()
     gl.bindTexture(gl.TEXTURE_2D, None)
-    gl.check_for_error()
 
     return texture
 

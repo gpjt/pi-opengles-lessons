@@ -92,6 +92,7 @@ def init_shaders(gl):
 
 def init_texture(gl):
     image = Image.open("nehe.gif")
+    image = image.transpose(Image.FLIP_TOP_BOTTOM)
     image_data = np.array(image.convert("RGBA"))
 
     texture = ctypes.c_uint()

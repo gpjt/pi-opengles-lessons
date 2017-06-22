@@ -1,4 +1,6 @@
+import ctypes
 import numpy as np
+from PIL import Image
 import time
 
 from pygl.egl import EGL
@@ -83,8 +85,24 @@ def init_shaders(gl):
     return shader_program
 
 
-def init_texture():
-    pass
+def init_texture(gl):
+    image = Image.open("nehe.gif")
+    image_data = np.array(image.convert("RGBA"))
+
+    texture = ctypes.c_uint()
+    gl.genTextures(1, ctypes.byref(texture))
+    gl.bindTexture(gl.TEXTURE_2D, texture)
+    gl.check_for_error()
+    gl.texImage2D(gl.TEXTURE_2D, ctypes.c_int(0), gl.RGBA, ctypes.c_int(image.width), ctypes.c_int(image.height), ctypes.c_int(0), gl.RGBA, gl.UNSIGNED_BYTE, image_data.ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)))
+    gl.check_for_error()
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+    gl.check_for_error()
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+    gl.check_for_error()
+    gl.bindTexture(gl.TEXTURE_2D, None)
+    gl.check_for_error()
+
+    return texture
 
 
 class Shape:
@@ -261,7 +279,7 @@ def main():
     gl = egl.get_context()
     shader_program = init_shaders(gl)
     cube_shape = init_buffers(gl)
-    texture = init_texture()
+    texture = init_texture(gl)
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.enable(gl.DEPTH_TEST)
     while True:

@@ -96,6 +96,10 @@ class GL:
         self.base_gl.genBuffers(1, ctypes.byref(result))
         return result
 
+    
+    def deleteBuffer(self, buffer):
+        self.base_gl.deleteBuffers(1, ctypes.byref(ctypes.c_int(buffer)))
+
 
     def bufferData(self, target, data, usage):
         data_type = None

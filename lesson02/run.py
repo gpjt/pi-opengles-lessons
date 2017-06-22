@@ -1,4 +1,3 @@
-import ctypes
 import numpy as np
 import time
 
@@ -182,9 +181,7 @@ def main():
     gl = egl.get_context()
     shader_program = init_shaders(gl)
     triangle_shape, square_shape = init_buffers(gl)
-    gl.clearColor(
-        ctypes.c_float(0.0), ctypes.c_float(0.0), ctypes.c_float(0.0), ctypes.c_float(1.0)
-    )
+    gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.enable(gl.DEPTH_TEST)
     while True:
         start = time.time()

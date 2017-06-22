@@ -70,6 +70,7 @@ class EGL(object):
             egl_constants.EGL_GREEN_SIZE, 8,
             egl_constants.EGL_BLUE_SIZE, 8,
             egl_constants.EGL_ALPHA_SIZE, 8,
+            egl_constants.EGL_DEPTH_SIZE, 24,
             egl_constants.EGL_SURFACE_TYPE, egl_constants.EGL_WINDOW_BIT,
             egl_constants.EGL_NONE
         ))

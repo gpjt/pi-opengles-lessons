@@ -83,9 +83,13 @@ def init_shaders(gl):
     return shader_program
 
 
+def init_texture():
+    pass
+
+
 class Shape:
 
-    def __init__(self, gl, positions, colors, indices=None):
+    def __init__(self, gl, positions, colors, indices=None, texture_coords=None):
         self.position_buffer = gl.createBuffer()
         gl.bindBuffer(gl.ARRAY_BUFFER, self.position_buffer)
         gl.bufferData(gl.ARRAY_BUFFER, sum(positions, []), gl.STATIC_DRAW)
@@ -104,51 +108,19 @@ class Shape:
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
             self.num_indices = len(indices)
 
-        self.angle = 0
+        if texture_coords is None:
+            self.texture_coords_buffer = gl.createBuffer()
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.self.texture_coords_buffer)
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, texture_coords, gl.STATIC_DRAW)
+            self.texture_coord_item_size = len(texture_coords[0])
+
+        self.angleX = 0
+        self.angleY = 0
+        self.angleZ = 0
 
 
 
 def init_buffers(gl): 
-    pyramid_shape = Shape(
-        gl,
-        [
-            # Front face
-            [ 0.0,  1.0,  0.0],
-            [-1.0, -1.0,  1.0],
-            [ 1.0, -1.0,  1.0],
-            # Right face
-            [ 0.0,  1.0,  0.0],
-            [ 1.0, -1.0,  1.0],
-            [ 1.0, -1.0, -1.0],
-            # Back face
-            [ 0.0,  1.0,  0.0],
-            [ 1.0, -1.0, -1.0],
-            [-1.0, -1.0, -1.0],
-            # Left face
-            [ 0.0,  1.0,  0.0],
-            [-1.0, -1.0, -1.0],
-            [-1.0, -1.0,  1.0],
-        ],
-        [
-            # Front face
-            [1.0, 0.0, 0.0, 1.0],
-            [0.0, 1.0, 0.0, 1.0],
-            [0.0, 0.0, 1.0, 1.0],
-            # Right face
-            [1.0, 0.0, 0.0, 1.0],
-            [0.0, 0.0, 1.0, 1.0],
-            [0.0, 1.0, 0.0, 1.0],
-            # Back face
-            [1.0, 0.0, 0.0, 1.0],
-            [0.0, 1.0, 0.0, 1.0],
-            [0.0, 0.0, 1.0, 1.0],
-            # Left face
-            [1.0, 0.0, 0.0, 1.0],
-            [0.0, 0.0, 1.0, 1.0],
-            [0.0, 1.0, 0.0, 1.0],
-        ]
-    )
-
     cube_face_colors = [
         [1.0, 0.0, 0.0, 1.0],     # Front face
         [1.0, 1.0, 0.0, 1.0],     # Back face
@@ -203,14 +175,51 @@ def init_buffers(gl):
             12, 13, 14,   12, 14, 15,  # Bottom face
             16, 17, 18,   16, 18, 19,  # Right face
             20, 21, 22,   20, 22, 23   # Left face
+        ],
+        texture_coords = [
+            # Front face
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
+
+            # Back face
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
+            0.0, 0.0,
+
+            # Top face
+            0.0, 1.0,
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+
+            # Bottom face
+            1.0, 1.0,
+            0.0, 1.0,
+            0.0, 0.0,
+            1.0, 0.0,
+
+            # Right face
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
+            0.0, 0.0,
+
+            # Left face
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
         ]
     )
 
-    return pyramid_shape, cube_shape
+    return cube_shape
 
 
 
-def draw_scene(egl, gl, shader_program, pyramid_shape, cube_shape):
+def draw_scene(egl, gl, shader_program, cube_shape, texture):
     gl.bindFramebuffer(gl.FRAMEBUFFER, 0)
     gl.viewport(0, 0, egl.width, egl.height)
 
@@ -219,23 +228,10 @@ def draw_scene(egl, gl, shader_program, pyramid_shape, cube_shape):
     p_matrix = perspective(45, float(egl.width.value) / float(egl.height.value), 0.1, 100.0)
     mv_matrix = np.identity(4)
 
-    mv_matrix = mv_matrix * translate([-1.5, 0.0, -7.0])
-    gl.bindBuffer(gl.ARRAY_BUFFER, pyramid_shape.position_buffer)
-    gl.vertexAttribPointer(
-        shader_program.vertex_position_attribute,
-        pyramid_shape.position_item_size, gl.FLOAT, False, 0, 0
-    )
-    gl.bindBuffer(gl.ARRAY_BUFFER, pyramid_shape.color_buffer)
-    gl.vertexAttribPointer(
-        shader_program.vertex_color_attribute,
-        pyramid_shape.color_item_size, gl.FLOAT, False, 0, 0
-    )
-    gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix)
-    pyramid_mv_matrix = mv_matrix * rotate(pyramid_shape.angle, np.array([0, 1, 0]))
-    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, pyramid_mv_matrix)
-    gl.drawArrays(gl.TRIANGLES, 0, pyramid_shape.num_vertices)
-
-    mv_matrix = mv_matrix * translate([3.0, 0.0, 0.0])
+    mv_matrix = mv_matrix * translate([0.0, 0.0, -5.0])
+    mv_matrix = mv_matrix * rotate(cube_shape.angleX, np.array([1, 0, 0]))
+    mv_matrix = mv_matrix * rotate(cube_shape.angleY, np.array([0, 1, 0]))
+    mv_matrix = mv_matrix * rotate(cube_shape.angleZ, np.array([0, 0, 1]))
     gl.bindBuffer(gl.ARRAY_BUFFER, cube_shape.position_buffer)
     gl.vertexAttribPointer(
         shader_program.vertex_position_attribute,
@@ -248,29 +244,30 @@ def draw_scene(egl, gl, shader_program, pyramid_shape, cube_shape):
     )
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube_shape.index_buffer)
     gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix)
-    cube_mv_matrix =  mv_matrix * rotate(cube_shape.angle, np.array([1, 1, 1]))
-    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, cube_mv_matrix)
+    gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, mv_matrix)
     gl.drawElements(gl.TRIANGLES, cube_shape.num_indices, gl.UNSIGNED_SHORT, 0)
 
     egl.swap_buffers()
 
 
-def animate(pyramid_shape, cube_shape):
-    pyramid_shape.angle = (pyramid_shape.angle + 1) % 360
-    cube_shape.angle = (cube_shape.angle - 0.8) % 360
+def animate(cube_shape):
+    cube_shape.angleX = (cube_shape.angleX - 0.8) % 360
+    cube_shape.angleY = (cube_shape.angleY - 0.8) % 360
+    cube_shape.angleZ = (cube_shape.angleZ - 0.8) % 360
 
 
 def main():
     egl = EGL()
     gl = egl.get_context()
     shader_program = init_shaders(gl)
-    pyramid_shape, cube_shape = init_buffers(gl)
+    cube_shape = init_buffers(gl)
+    texture = init_texture()
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.enable(gl.DEPTH_TEST)
     while True:
         start = time.time()
-        draw_scene(egl, gl, shader_program, pyramid_shape, cube_shape)
-        animate(pyramid_shape, cube_shape)
+        draw_scene(egl, gl, shader_program, cube_shape, texture)
+        animate(cube_shape)
         remainder = (1/60.0) - (time.time() - start)
         if remainder > 0:
             time.sleep(remainder)

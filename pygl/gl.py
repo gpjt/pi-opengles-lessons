@@ -33,6 +33,18 @@ class GL:
             raise Exception("GL error {}".format(hex(e)))
 
 
+    def clearColor(self, r, g, b, a):
+        if isinstance(r, float):
+            r = ctypes.c_float(r)
+        if isinstance(g, float):
+            g = ctypes.c_float(g)
+        if isinstance(b, float):
+            b = ctypes.c_float(b)
+        if isinstance(a, float):
+            a = ctypes.c_float(a)
+        self.base_gl.clearColor(r, g, b, a)
+
+
     def getProgramParameter(self, program, parameter):
         result = ctypes.c_int()
         self.base_gl.getProgramiv(program, parameter, ctypes.byref(result))

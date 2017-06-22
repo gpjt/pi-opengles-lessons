@@ -11,25 +11,27 @@ from matrix_utils import perspective, rotate, translate
 FRAGMENT_SHADER = """
     precision mediump float;
 
-    varying vec4 vColor;
+    varying vec2 vTextureCoord;
+
+    uniform sampler2D uSampler;
 
     void main(void) {
-        gl_FragColor = vColor;
+        gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
     }
 """
 
 VERTEX_SHADER = """
     attribute vec3 aVertexPosition;
-    attribute vec4 aVertexColor;
+    attribute vec2 aTextureCoord;
 
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
 
-    varying vec4 vColor;
+    varying vec2 vTextureCoord;
 
     void main(void) {
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-        vColor = aVertexColor;
+        vTextureCoord = aTextureCoord;
     }
 """
 
@@ -57,8 +59,11 @@ def init_shaders(gl):
 
     shader_program = Program(gl)
     gl.attachShader(shader_program.gl_program, vertex_shader)
+    gl.check_for_error()
     gl.attachShader(shader_program.gl_program, fragment_shader)
+    gl.check_for_error()
     gl.linkProgram(shader_program.gl_program)
+    gl.check_for_error()
 
     if gl.getProgramParameter(shader_program.gl_program, gl.LINK_STATUS) == 0:
         log = gl.getProgramInfoLog(shader_program.gl_program)
@@ -68,12 +73,16 @@ def init_shaders(gl):
     shader_program.vertex_position_attribute = gl.getAttribLocation(
         shader_program.gl_program, "aVertexPosition"
     )
+    gl.check_for_error()
     gl.enableVertexAttribArray(shader_program.vertex_position_attribute)
+    gl.check_for_error()
 
-    shader_program.vertex_color_attribute = gl.getAttribLocation(
-        shader_program.gl_program, "aVertexColor"
+    shader_program.texture_coord_attribute = gl.getAttribLocation(
+        shader_program.gl_program, "aTextureCoord"
     )
-    gl.enableVertexAttribArray(shader_program.vertex_color_attribute)
+    gl.check_for_error()
+    gl.enableVertexAttribArray(shader_program.texture_coord_attribute)
+    gl.check_for_error()
 
     shader_program.p_matrix_uniform = gl.getUniformLocation(
         shader_program.gl_program, "uPMatrix"
@@ -81,6 +90,10 @@ def init_shaders(gl):
     shader_program.mv_matrix_uniform = gl.getUniformLocation(
         shader_program.gl_program, "uMVMatrix"
     )
+    shader_program.sampler_uniform = gl.getUniformLocation(
+        shader_program.gl_program, "uSampler"
+    )
+    gl.check_for_error()
 
     return shader_program
 
@@ -107,18 +120,19 @@ def init_texture(gl):
 
 class Shape:
 
-    def __init__(self, gl, positions, colors, indices=None, texture_coords=None):
+    def __init__(self, gl, positions, colors=None, indices=None, texture_coords=None):
         self.position_buffer = gl.createBuffer()
         gl.bindBuffer(gl.ARRAY_BUFFER, self.position_buffer)
         gl.bufferData(gl.ARRAY_BUFFER, sum(positions, []), gl.STATIC_DRAW)
         self.position_item_size = len(positions[0])
 
-        self.color_buffer = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER, self.color_buffer)
-        gl.bufferData(gl.ARRAY_BUFFER, sum(colors, []), gl.STATIC_DRAW)
-        self.color_item_size = len(colors[0])
-
         self.num_vertices = len(positions)
+
+        if colors is not None:
+            self.color_buffer = gl.createBuffer()
+            gl.bindBuffer(gl.ARRAY_BUFFER, self.color_buffer)
+            gl.bufferData(gl.ARRAY_BUFFER, sum(colors, []), gl.STATIC_DRAW)
+            self.color_item_size = len(colors[0])
 
         if indices is not None:
             self.index_buffer = gl.createBuffer()
@@ -126,10 +140,10 @@ class Shape:
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
             self.num_indices = len(indices)
 
-        if texture_coords is None:
-            self.texture_coords_buffer = gl.createBuffer()
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.self.texture_coords_buffer)
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, texture_coords, gl.STATIC_DRAW)
+        if texture_coords is not None:
+            self.texture_coord_buffer = gl.createBuffer()
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.texture_coord_buffer)
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, sum(texture_coords, []), gl.STATIC_DRAW)
             self.texture_coord_item_size = len(texture_coords[0])
 
         self.angleX = 0
@@ -139,18 +153,6 @@ class Shape:
 
 
 def init_buffers(gl): 
-    cube_face_colors = [
-        [1.0, 0.0, 0.0, 1.0],     # Front face
-        [1.0, 1.0, 0.0, 1.0],     # Back face
-        [0.0, 1.0, 0.0, 1.0],     # Top face
-        [1.0, 0.5, 0.5, 1.0],     # Bottom face
-        [1.0, 0.0, 1.0, 1.0],     # Right face
-        [0.0, 0.0, 1.0, 1.0],     # Left face
-    ]
-    cube_colors = []
-    for color in cube_face_colors:
-        for _ in range(4):
-            cube_colors.append(color)
     cube_shape = Shape(
         gl,
         [
@@ -185,7 +187,6 @@ def init_buffers(gl):
             [-1.0,  1.0,  1.0],
             [-1.0,  1.0, -1.0],
         ],
-        cube_colors,
         indices=[
             0, 1, 2,      0, 2, 3,     # Front face
             4, 5, 6,      4, 6, 7,     # Back face
@@ -196,40 +197,40 @@ def init_buffers(gl):
         ],
         texture_coords = [
             # Front face
-            0.0, 0.0,
-            1.0, 0.0,
-            1.0, 1.0,
-            0.0, 1.0,
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [1.0, 1.0],
+            [0.0, 1.0],
 
             # Back face
-            1.0, 0.0,
-            1.0, 1.0,
-            0.0, 1.0,
-            0.0, 0.0,
+            [1.0, 0.0],
+            [1.0, 1.0],
+            [0.0, 1.0],
+            [0.0, 0.0],
 
             # Top face
-            0.0, 1.0,
-            0.0, 0.0,
-            1.0, 0.0,
-            1.0, 1.0,
+            [0.0, 1.0],
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [1.0, 1.0],
 
             # Bottom face
-            1.0, 1.0,
-            0.0, 1.0,
-            0.0, 0.0,
-            1.0, 0.0,
+            [1.0, 1.0],
+            [0.0, 1.0],
+            [0.0, 0.0],
+            [1.0, 0.0],
 
             # Right face
-            1.0, 0.0,
-            1.0, 1.0,
-            0.0, 1.0,
-            0.0, 0.0,
+            [1.0, 0.0],
+            [1.0, 1.0],
+            [0.0, 1.0],
+            [0.0, 0.0],
 
             # Left face
-            0.0, 0.0,
-            1.0, 0.0,
-            1.0, 1.0,
-            0.0, 1.0,
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [1.0, 1.0],
+            [0.0, 1.0],
         ]
     )
 
@@ -255,11 +256,16 @@ def draw_scene(egl, gl, shader_program, cube_shape, texture):
         shader_program.vertex_position_attribute,
         cube_shape.position_item_size, gl.FLOAT, False, 0, 0
     )
-    gl.bindBuffer(gl.ARRAY_BUFFER, cube_shape.color_buffer)
+    gl.bindBuffer(gl.ARRAY_BUFFER, cube_shape.texture_coord_buffer)
     gl.vertexAttribPointer(
-        shader_program.vertex_color_attribute,
-        cube_shape.color_item_size, gl.FLOAT, False, 0, 0
+        shader_program.texture_coord_attribute,
+        cube_shape.texture_coord_item_size, gl.FLOAT, False, 0, 0
     )
+
+    gl.activeTexture(gl.TEXTURE0)
+    gl.bindTexture(gl.TEXTURE_2D, texture)
+    gl.uniform1i(shader_program.sampler_uniform, 0)
+
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube_shape.index_buffer)
     gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix)
     gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, mv_matrix)

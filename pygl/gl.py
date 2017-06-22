@@ -48,7 +48,7 @@ class GL:
     def getProgramParameter(self, program, parameter):
         result = ctypes.c_int()
         self.base_gl.getProgramiv(program, parameter, ctypes.byref(result))
-        return result
+        return result.value
 
 
     def getProgramInfoLog(self, program):
@@ -68,7 +68,7 @@ class GL:
     def getShaderParameter(self, shader, parameter):
         result = ctypes.c_int()
         self.base_gl.getShaderiv(shader, parameter, ctypes.byref(result))
-        return result
+        return result.value
 
 
     def getShaderInfoLog(self, shader):

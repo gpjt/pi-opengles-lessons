@@ -307,6 +307,11 @@ def handle_keys(stdscr, cube_shape):
     elif c == 258:
         # Down cursor key
         cube_shape.xSpeed += 1
+    elif c == 102:
+        cube_shape.filter = (cube_shape.filter + 1) % 3
+        print("Using texture {}\n".format(cube_shape.filter))
+    elif c != -1:
+        print("Unrecognised keycode {}".format(c))
 
 
 def animate(cube_shape):

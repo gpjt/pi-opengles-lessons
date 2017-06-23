@@ -1,3 +1,4 @@
+import curses
 import numpy as np
 from PIL import Image
 import time
@@ -286,12 +287,35 @@ def draw_scene(egl, gl, shader_program, cube_shape, textures):
     egl.swap_buffers()
 
 
+def handle_keys(stdscr, cube_shape):
+    c = stdscr.getch()
+    if c == 339:
+        # Page Up
+        cube_shape.z -= 0.05
+    elif c == 338:
+        # Page Down
+        cube_shape.z += 0.05
+    elif c == 260:
+        # Left cursor key
+        cube_shape.ySpeed -= 1
+    elif c == 261:
+        # Right cursor key
+        cube_shape.ySpeed += 1
+    elif c == 259:
+        # Up cursor key
+        cube_shape.xSpeed -= 1
+    elif c == 258:
+        # Down cursor key
+        cube_shape.xSpeed += 1
+
+
 def animate(cube_shape):
     cube_shape.xRot = (cube_shape.xRot - 0.8 * cube_shape.xSpeed) % 360
     cube_shape.yRot = (cube_shape.yRot - 0.8 * cube_shape.ySpeed) % 360
 
 
-def main():
+def main(stdscr):
+    stdscr.nodelay(1)
     egl = EGL()
     gl = egl.get_context()
     shader_program = init_shaders(gl)
@@ -301,6 +325,7 @@ def main():
     gl.enable(gl.DEPTH_TEST)
     while True:
         start = time.time()
+        handle_keys(stdscr, cube_shape)
         draw_scene(egl, gl, shader_program, cube_shape, textures)
         animate(cube_shape)
         remainder = (1/60.0) - (time.time() - start)
@@ -310,4 +335,4 @@ def main():
 
     
 if __name__ == "__main__":
-    main()
+    curses.wrapper(main)

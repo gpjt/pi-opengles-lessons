@@ -19,6 +19,7 @@ FRAGMENT_SHADER = """
     void main(void) {
         vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
         gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
+        gl_FragColor = vec4(1.0, 1.0, 1.0, textureColor.a);
     }
 """
 
@@ -375,6 +376,7 @@ def draw_scene(egl, gl, shader_program, cube_shape, texture, lighting):
             lighting.ambient_g,
             lighting.ambient_b,
         )
+        print("Ambient lighting", lighting.ambient_r, lighting.ambient_g, lighting.ambient_b)
         gl.check_for_error()
         
         lighting_direction = np.array([
@@ -386,6 +388,7 @@ def draw_scene(egl, gl, shader_program, cube_shape, texture, lighting):
         if norm != 0:
             lighting_direction /= norm
         lighting_direction *= -1
+        print("Lighting direction: ", lighting_direction)
         gl.uniform3fv(shader_program.lighting_direction_uniform, lighting_direction)
         gl.check_for_error()
 
@@ -395,6 +398,7 @@ def draw_scene(egl, gl, shader_program, cube_shape, texture, lighting):
             lighting.directional_g,
             lighting.directional_b,
         )
+        print("Directional lighting: ", lighting.directional_r, lighting.directional_g, lighting.directional_b)
         gl.check_for_error()
     
 
@@ -402,7 +406,9 @@ def draw_scene(egl, gl, shader_program, cube_shape, texture, lighting):
     gl.check_for_error()
     gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, mv_matrix)
     gl.check_for_error()
-    normal_matrix = mv_matrix[:3,:3].T
+    print("MV matrix", mv_matrix)
+    normal_matrix = mv_matrix[:3,:3].I.T
+    print("Normal matrix:", normal_matrix)
     gl.uniformMatrix3fv(shader_program.n_matrix_uniform, False, normal_matrix)
     gl.check_for_error()
 

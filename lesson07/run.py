@@ -19,7 +19,6 @@ FRAGMENT_SHADER = """
     void main(void) {
         vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
         gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
-        gl_FragColor = vec4(1.0, 1.0, 1.0, textureColor.a);
     }
 """
 
@@ -112,27 +111,24 @@ def init_shaders(gl):
     shader_program.n_matrix_uniform = gl.getUniformLocation(
         shader_program.gl_program, "uNMatrix"
     )
-    gl.check_for_error()
     shader_program.sampler_uniform = gl.getUniformLocation(
         shader_program.gl_program, "uSampler"
     )
-    gl.check_for_error()
     shader_program.use_lighting_uniform = gl.getUniformLocation(
         shader_program.gl_program, "uUseLighting"
     )
-    gl.check_for_error()
     shader_program.use_lighting_uniform = gl.getUniformLocation(
         shader_program.gl_program, "uUseLighting"
     )
-    gl.check_for_error()
     shader_program.ambient_color_uniform = gl.getUniformLocation(
         shader_program.gl_program, "uAmbientColor"
     )
-    gl.check_for_error()
+    shader_program.directional_color_uniform = gl.getUniformLocation(
+        shader_program.gl_program, "uDirectionalColor"
+    )
     shader_program.lighting_direction_uniform = gl.getUniformLocation(
         shader_program.gl_program, "uLightingDirection"
     )
-    gl.check_for_error()
 
     return shader_program
 
@@ -376,8 +372,6 @@ def draw_scene(egl, gl, shader_program, cube_shape, texture, lighting):
             lighting.ambient_g,
             lighting.ambient_b,
         )
-        print("Ambient lighting", lighting.ambient_r, lighting.ambient_g, lighting.ambient_b)
-        gl.check_for_error()
         
         lighting_direction = np.array([
             lighting.direction_x,
@@ -388,29 +382,20 @@ def draw_scene(egl, gl, shader_program, cube_shape, texture, lighting):
         if norm != 0:
             lighting_direction /= norm
         lighting_direction *= -1
-        print("Lighting direction: ", lighting_direction)
         gl.uniform3fv(shader_program.lighting_direction_uniform, lighting_direction)
-        gl.check_for_error()
 
         gl.uniform3f(
-            shader_program.ambient_color_uniform,
+            shader_program.directional_color_uniform,
             lighting.directional_r,
             lighting.directional_g,
             lighting.directional_b,
         )
-        print("Directional lighting: ", lighting.directional_r, lighting.directional_g, lighting.directional_b)
-        gl.check_for_error()
     
 
     gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix)
-    gl.check_for_error()
     gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, mv_matrix)
-    gl.check_for_error()
-    print("MV matrix", mv_matrix)
     normal_matrix = mv_matrix[:3,:3].I.T
-    print("Normal matrix:", normal_matrix)
     gl.uniformMatrix3fv(shader_program.n_matrix_uniform, False, normal_matrix)
-    gl.check_for_error()
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube_shape.index_buffer)
     gl.drawElements(gl.TRIANGLES, cube_shape.num_indices, gl.UNSIGNED_SHORT, 0)

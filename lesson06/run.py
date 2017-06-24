@@ -129,7 +129,7 @@ def init_textures(gl):
 
 class Shape:
 
-    def __init__(self, gl, positions, colors=None, indices=None, texture_coords=None):
+    def __init__(self, gl, positions, indices, texture_coords):
         self.position_buffer = gl.createBuffer()
         gl.bindBuffer(gl.ARRAY_BUFFER, self.position_buffer)
         gl.bufferData(gl.ARRAY_BUFFER, sum(positions, []), gl.STATIC_DRAW)
@@ -137,23 +137,15 @@ class Shape:
 
         self.num_vertices = len(positions)
 
-        if colors is not None:
-            self.color_buffer = gl.createBuffer()
-            gl.bindBuffer(gl.ARRAY_BUFFER, self.color_buffer)
-            gl.bufferData(gl.ARRAY_BUFFER, sum(colors, []), gl.STATIC_DRAW)
-            self.color_item_size = len(colors[0])
+        self.index_buffer = gl.createBuffer()
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.index_buffer)
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
+        self.num_indices = len(indices)
 
-        if indices is not None:
-            self.index_buffer = gl.createBuffer()
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.index_buffer)
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
-            self.num_indices = len(indices)
-
-        if texture_coords is not None:
-            self.texture_coord_buffer = gl.createBuffer()
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.texture_coord_buffer)
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, sum(texture_coords, []), gl.STATIC_DRAW)
-            self.texture_coord_item_size = len(texture_coords[0])
+        self.texture_coord_buffer = gl.createBuffer()
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.texture_coord_buffer)
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, sum(texture_coords, []), gl.STATIC_DRAW)
+        self.texture_coord_item_size = len(texture_coords[0])
 
         self.xRot = 0
         self.xSpeed = 0

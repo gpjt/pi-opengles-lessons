@@ -125,6 +125,30 @@ class GL:
         )
 
 
+    def uniform3f(self, location, v0, v1, v2):
+        if isinstance(v0, float) or isinstance(v0, int):
+           v0 = ctypes.c_float(v0)
+        if isinstance(v1, float) or isinstance(v1, int):
+           v1 = ctypes.c_float(v1)
+        if isinstance(v2, float) or isinstance(v2, int):
+           v2 = ctypes.c_float(v2)
+        self.base_gl.uniform3f(location, v0, v1, v2)
+
+
+    def uniform3fv(self, location, value):
+        if isinstance(value, np.ndarray):
+            value = np.asfortranarray(value, dtype=np.float32).ctypes.data
+        self.base_gl.uniform3fv(location, 3, value)
+
+
+    def uniformMatrix3fv(self, location, transpose, value):
+        if transpose != False:
+            raise ValueError("Transpose must be False -- see OpenGL spec")
+        if isinstance(value, np.ndarray):
+            value = np.asfortranarray(value, dtype=np.float32).ctypes.data
+        self.base_gl.uniformMatrix3fv(location, 1, transpose, value)
+
+
     def uniformMatrix4fv(self, location, transpose, value):
         if transpose != False:
             raise ValueError("Transpose must be False -- see OpenGL spec")

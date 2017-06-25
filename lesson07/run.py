@@ -185,9 +185,6 @@ class Shape:
 
         self.z = -5.0
 
-        self.lighting = True
-
-
 
 def init_buffers(gl): 
     cube_shape = Shape(

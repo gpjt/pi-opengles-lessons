@@ -179,9 +179,9 @@ class Shape:
         self.normal_item_size = len(normals[0])
 
         self.xRot = 0
-        self.xSpeed = 0
+        self.xSpeed = 0.5
         self.yRot = 0
-        self.ySpeed = 0
+        self.ySpeed = -0.5
 
         self.z = -5.0
 
@@ -413,16 +413,16 @@ def handle_keys(stdscr, cube_shape):
         cube_shape.z += 0.05
     elif c == 260:
         # Left cursor key
-        cube_shape.ySpeed -= 1
+        cube_shape.ySpeed -= 0.5
     elif c == 261:
         # Right cursor key
-        cube_shape.ySpeed += 1
+        cube_shape.ySpeed += 0.5
     elif c == 259:
         # Up cursor key
-        cube_shape.xSpeed -= 1
+        cube_shape.xSpeed -= 0.5
     elif c == 258:
         # Down cursor key
-        cube_shape.xSpeed += 1
+        cube_shape.xSpeed += 0.5
     elif c != -1:
         print("Unrecognised keycode {}".format(c))
 

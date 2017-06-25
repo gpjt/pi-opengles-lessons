@@ -158,7 +158,7 @@ def init_buffers(gl):
 class World(object):
 
     def __init__(self):
-        self.tilt = 0
+        self.tilt = 90
         self.zoom = -15
         self.spin = 0
         self.twinkle = False

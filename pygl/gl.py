@@ -9,6 +9,11 @@ import pygl.gl2
 class _BaseGL:
 
     def __getattr__(self, attr_name):
+        if attr_name == "ZERO":
+            return 0
+        if attr_name == "ONE":
+            return 1
+
         constant_name = "GL_{}".format(attr_name)
         if hasattr(pygl.gl2, constant_name):
             return getattr(pygl.gl2, constant_name)
@@ -123,6 +128,12 @@ class GL:
             ctypes.sizeof(converted_data), ctypes.byref(converted_data),
             usage
         )
+
+
+    def uniform1f(self, location, v):
+        if isinstance(v, float) or isinstance(v0, int):
+           v = ctypes.c_float(v)
+        self.base_gl.uniform1f(location, v)
 
 
     def uniform3f(self, location, v0, v1, v2):

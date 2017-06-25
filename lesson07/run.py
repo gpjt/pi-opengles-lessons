@@ -403,7 +403,7 @@ def draw_scene(egl, gl, shader_program, cube_shape, texture, lighting):
     egl.swap_buffers()
 
 
-def handle_keys(stdscr, cube_shape):
+def handle_keys(stdscr, cube_shape, lighting):
     c = stdscr.getch()
     if c == 339:
         # Page Up
@@ -423,6 +423,8 @@ def handle_keys(stdscr, cube_shape):
     elif c == 258:
         # Down cursor key
         cube_shape.xSpeed += 0.5
+    elif c == 32:
+        lighting.on = not lighting.on
     elif c != -1:
         print("Unrecognised keycode {}".format(c))
 
@@ -432,8 +434,45 @@ def animate(cube_shape):
     cube_shape.yRot = (cube_shape.yRot - 0.8 * cube_shape.ySpeed) % 360
 
 
-def main(stdscr):
+def update_curses_display(stdscr, lighting):
+    stdscr.clear()
+
+    stdscr.addstr(2, 1, "Lights (space to toggle): {}".format(lighting.on))
+
+    stdscr.addstr(4, 1, "Directional light:")
+    stdscr.addstr(5, 1, "Direction:")
+    stdscr.addstr(5, 13, "X:")
+    stdscr.addstr(5, 16, str(lighting.direction_x))
+    stdscr.addstr(5, 27, "Y:")
+    stdscr.addstr(5, 30, str(lighting.direction_y))
+    stdscr.addstr(5, 41, "Z:")
+    stdscr.addstr(5, 44, str(lighting.direction_z))
+    stdscr.addstr(6, 1, "Color:")
+    stdscr.addstr(6, 13, "R:")
+    stdscr.addstr(6, 16, str(lighting.directional_r))
+    stdscr.addstr(6, 27, "G:")
+    stdscr.addstr(6, 30, str(lighting.directional_g))
+    stdscr.addstr(6, 41, "B:")
+    stdscr.addstr(6, 44, str(lighting.directional_b))
+
+    stdscr.addstr(8, 1, "Ambient light:")
+    stdscr.addstr(9, 1, "Color:")
+    stdscr.addstr(9, 13, "R:")
+    stdscr.addstr(9, 16, str(lighting.ambient_r))
+    stdscr.addstr(9, 27, "G:")
+    stdscr.addstr(9, 30, str(lighting.ambient_g))
+    stdscr.addstr(9, 41, "B:")
+    stdscr.addstr(9, 44, str(lighting.ambient_b))
+
+    stdscr.refresh()
+
+
+def init_curses_display(stdscr):
     stdscr.nodelay(1)
+
+
+def main(stdscr):
+    init_curses_display(stdscr)
     egl = EGL()
     gl = egl.get_context()
     shader_program = init_shaders(gl)
@@ -444,7 +483,8 @@ def main(stdscr):
     gl.enable(gl.DEPTH_TEST)
     while True:
         start = time.time()
-        handle_keys(stdscr, cube_shape)
+        handle_keys(stdscr, cube_shape, lighting)
+        update_curses_display(stdscr, lighting)
         draw_scene(egl, gl, shader_program, cube_shape, texture, lighting)
         animate(cube_shape)
         remainder = (1/60.0) - (time.time() - start)

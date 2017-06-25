@@ -364,7 +364,7 @@ def draw_scene(egl, gl, shader_program, cube_shape, texture, lighting):
     gl.bindTexture(gl.TEXTURE_2D, texture)
     gl.uniform1i(shader_program.sampler_uniform, 0)
 
-    gl.uniform1i(shader_program.use_lighting_uniform, 1) # lighting.on)
+    gl.uniform1i(shader_program.use_lighting_uniform, lighting.on)
     if lighting.on:
         gl.uniform3f(
             shader_program.ambient_color_uniform,

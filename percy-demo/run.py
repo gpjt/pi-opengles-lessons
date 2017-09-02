@@ -1,4 +1,3 @@
-import curses
 import numpy as np
 from PIL import Image
 import time
@@ -417,80 +416,12 @@ def draw_scene(egl, gl, shader_program, cube_shape, texture, lighting):
     egl.swap_buffers()
 
 
-def handle_keys(stdscr, cube_shape, lighting):
-    c = stdscr.getch()
-    if c == 339:
-        # Page Up
-        cube_shape.z -= 0.05
-    elif c == 338:
-        # Page Down
-        cube_shape.z += 0.05
-    elif c == 260:
-        # Left cursor key
-        cube_shape.ySpeed -= 0.5
-    elif c == 261:
-        # Right cursor key
-        cube_shape.ySpeed += 0.5
-    elif c == 259:
-        # Up cursor key
-        cube_shape.xSpeed -= 0.5
-    elif c == 258:
-        # Down cursor key
-        cube_shape.xSpeed += 0.5
-    elif c == 32:
-        lighting.on = not lighting.on
-    elif c == 9:
-        lighting.blend = not lighting.blend
-    elif c != -1:
-        print("Unrecognised keycode {}".format(c))
-
-
 def animate(cube_shape):
     cube_shape.xRot = (cube_shape.xRot - 0.8 * cube_shape.xSpeed) % 360
     cube_shape.yRot = (cube_shape.yRot - 0.8 * cube_shape.ySpeed) % 360
 
 
-def update_curses_display(stdscr, lighting):
-    stdscr.clear()
-
-    stdscr.addstr(2, 1, "Lights (space to toggle): {}".format(lighting.on))
-    stdscr.addstr(3, 1, "Blend (tab to toggle): {}".format(lighting.blend))
-    stdscr.addstr(4, 1, "Alpha: {}".format(lighting.alpha))
-
-    stdscr.addstr(6, 1, "Directional light:")
-    stdscr.addstr(7, 1, "Direction:")
-    stdscr.addstr(7, 13, "X:")
-    stdscr.addstr(7, 16, str(lighting.direction_x))
-    stdscr.addstr(7, 27, "Y:")
-    stdscr.addstr(7, 30, str(lighting.direction_y))
-    stdscr.addstr(7, 41, "Z:")
-    stdscr.addstr(7, 44, str(lighting.direction_z))
-    stdscr.addstr(8, 1, "Color:")
-    stdscr.addstr(8, 13, "R:")
-    stdscr.addstr(8, 16, str(lighting.directional_r))
-    stdscr.addstr(8, 27, "G:")
-    stdscr.addstr(8, 30, str(lighting.directional_g))
-    stdscr.addstr(8, 41, "B:")
-    stdscr.addstr(8, 44, str(lighting.directional_b))
-
-    stdscr.addstr(10, 1, "Ambient light:")
-    stdscr.addstr(11, 1, "Color:")
-    stdscr.addstr(11, 13, "R:")
-    stdscr.addstr(11, 16, str(lighting.ambient_r))
-    stdscr.addstr(11, 27, "G:")
-    stdscr.addstr(11, 30, str(lighting.ambient_g))
-    stdscr.addstr(11, 41, "B:")
-    stdscr.addstr(11, 44, str(lighting.ambient_b))
-
-    stdscr.refresh()
-
-
-def init_curses_display(stdscr):
-    stdscr.nodelay(1)
-
-
-def main(stdscr):
-    init_curses_display(stdscr)
+def main():
     egl = EGL()
     gl = egl.get_context()
     shader_program = init_shaders(gl)
@@ -500,8 +431,6 @@ def main(stdscr):
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     while True:
         start = time.time()
-        handle_keys(stdscr, cube_shape, lighting)
-        update_curses_display(stdscr, lighting)
         draw_scene(egl, gl, shader_program, cube_shape, texture, lighting)
         animate(cube_shape)
         remainder = (1/60.0) - (time.time() - start)
@@ -511,4 +440,4 @@ def main(stdscr):
 
     
 if __name__ == "__main__":
-    curses.wrapper(main)
+    main()

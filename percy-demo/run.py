@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from PIL import Image
 import time
 
@@ -138,7 +139,8 @@ def init_shaders(gl):
 
 
 def init_texture(gl):
-    image = Image.open("glass.gif")
+    image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "glass.gif")
+    image = Image.open(image_path)
     image = image.transpose(Image.FLIP_TOP_BOTTOM)
     image_data = np.array(image.convert("RGBA"))
 

@@ -10,10 +10,11 @@ def eglints(L):
 if ctypes.util.find_library('bcm_host'):
     opengles = ctypes.CDLL('libbrcmGLESv2.so')
     openegl = ctypes.CDLL('libbrcmEGL.so')
-    from pygl.pi_backend import Backend  # noqa
+    from pygl.pi_backend import Backend  # NOQA
 else:
     opengles = ctypes.CDLL('libGLESv2.so')
     openegl = ctypes.CDLL('libEGL.so')
+    from pygl.linux_backend import Backend  # NOQA
 
 
 openegl.eglGetDisplay.restype = ctypes.c_void_p

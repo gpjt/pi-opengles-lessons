@@ -93,17 +93,16 @@ class EGL(object):
 
         numconfig = eglint()
         config = ctypes.c_void_p()
-        r = openegl.eglChooseConfig(
+        config_ok = openegl.eglChooseConfig(
             self.display,
             ctypes.byref(attribute_list),
             ctypes.byref(config), 1,
             ctypes.byref(numconfig)
         )
-        if r == 0:
+        if config_ok == 0:
             raise Exception("Could not choose EGL config: {}".format(openegl.eglGetError()))
 
-        r = openegl.eglBindAPI(egl_constants.EGL_OPENGL_ES_API)
-        if r == 0:
+        if openegl.eglBindAPI(egl_constants.EGL_OPENGL_ES_API) == 0:
             raise Exception("Could not bind config: {}".format(openegl.eglGetError()))
 
         context_attribs = eglints((egl_constants.EGL_CONTEXT_CLIENT_VERSION, 2, egl_constants.EGL_NONE))
@@ -118,8 +117,7 @@ class EGL(object):
         self.width, self.height = self.backend.get_display_size()
         self.surface = self.backend.create_surface(self.display, config, self.width, self.height)
 
-        r = openegl.eglMakeCurrent(self.display, self.surface, self.surface, self.context)
-        if r == 0:
+        if openegl.eglMakeCurrent(self.display, self.surface, self.surface, self.context) == 0:
             raise Exception("Could not make our surface current: {}".format(openegl.eglGetError()))
 
 

@@ -3,8 +3,7 @@ import ctypes.util
 
 
 def eglints(L):
-    """Converts a tuple to an array of eglints (would a pointer return be better?)"""
-    return (ctypes.c_int*len(L))(*L)
+    return (ctypes.c_int * len(L))(*L)
 
 
 if ctypes.util.find_library('bcm_host'):

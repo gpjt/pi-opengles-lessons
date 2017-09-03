@@ -17,7 +17,9 @@ class Backend(object):
     def get_display_size(self):
         width = ctypes.c_int()
         height = ctypes.c_int()
-        error_code = bcm.graphics_get_display_size(0, ctypes.byref(width),ctypes.byref(height))
+        error_code = bcm.graphics_get_display_size(
+            0, ctypes.byref(width), ctypes.byref(height)
+        )
         if error_code < 0:
             raise Exception("Could not get display size")
         return width, height
@@ -47,7 +49,9 @@ class Backend(object):
         # We need to keep a reference to this because if it gets
         # GCed we stop displaying stuff.
         self.native_window_pointer = ctypes.pointer(native_window)
-        surface = openegl.eglCreateWindowSurface(display, config, self.native_window_pointer, 0)
+        surface = openegl.eglCreateWindowSurface(
+            display, config, self.native_window_pointer, 0
+        )
         if surface == egl_constants.EGL_NO_SURFACE:
             raise Exception("Could not create surface")
         return surface

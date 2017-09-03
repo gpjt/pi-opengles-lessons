@@ -25,8 +25,12 @@ class Backend(object):
             x=0, y=0, width=self.width.value, height=self.height.value,
             border_width=0, depth=self.screen.root_depth
         )
-        atom_net_wm_state = self.x_display.intern_atom('_NET_WM_STATE', True)
-        atom_net_wm_state_fullscreen = self.x_display.intern_atom('_NET_WM_STATE_FULLSCREEN', True)
+        atom_net_wm_state = self.x_display.intern_atom(
+            '_NET_WM_STATE', True
+        )
+        atom_net_wm_state_fullscreen = self.x_display.intern_atom(
+            '_NET_WM_STATE_FULLSCREEN', True
+        )
 
         window.change_property(
             atom_net_wm_state,
@@ -36,7 +40,11 @@ class Backend(object):
         )
 
         window.set_wm_normal_hints(
-            flags=Xlib.Xutil.PPosition | Xlib.Xutil.PSize | Xlib.Xutil.PMinSize,
+            flags=(
+                Xlib.Xutil.PPosition |
+                Xlib.Xutil.PSize |
+                Xlib.Xutil.PMinSize
+            ),
             min_width=self.width.value,
             min_height=self.height.value,
         )
@@ -44,6 +52,10 @@ class Backend(object):
         window.map()
 
         print(self.display)
-        self.surface = openegl.eglCreateWindowSurface(self.display, config, window.id, 0)
+        self.surface = openegl.eglCreateWindowSurface(
+            self.display, config, window.id, 0
+        )
         if self.surface == egl_constants.EGL_NO_SURFACE:
-            raise Exception("Could not create surface: {}".format(openegl.eglGetError()))
+            raise Exception(
+                "Could not create surface: {}".format(openegl.eglGetError())
+            )

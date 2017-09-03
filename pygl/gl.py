@@ -57,16 +57,20 @@ class GL:
 
     def getProgramInfoLog(self, program):
         N = 1024
-        log = (ctypes.c_char*N)()
+        log = (ctypes.c_char * N)()
         loglen = ctypes.c_int()
-        self.base_gl.getProgramInfoLog(program, N, ctypes.byref(loglen), ctypes.byref(log))
+        self.base_gl.getProgramInfoLog(
+            program, N, ctypes.byref(loglen), ctypes.byref(log)
+        )
         return log.value.decode("utf-8")
 
 
     def shaderSource(self, shader, source):
         if isinstance(source, str):
             source = source.encode("utf-8")
-        self.base_gl.shaderSource(shader, 1, ctypes.byref(ctypes.c_char_p(source)), 0)
+        self.base_gl.shaderSource(
+            shader, 1, ctypes.byref(ctypes.c_char_p(source)), 0
+        )
 
 
     def getShaderParameter(self, shader, parameter):
@@ -77,9 +81,11 @@ class GL:
 
     def getShaderInfoLog(self, shader):
         N = 1024
-        log = (ctypes.c_char*N)()
+        log = (ctypes.c_char * N)()
         loglen = ctypes.c_int()
-        self.base_gl.getShaderInfoLog(shader, N, ctypes.byref(loglen), ctypes.byref(log))
+        self.base_gl.getShaderInfoLog(
+            shader, N, ctypes.byref(loglen), ctypes.byref(log)
+        )
         return log.value.decode("utf-8")
 
 
@@ -112,15 +118,19 @@ class GL:
                 data_type = type(item)
             elif type(item) != data_type:
                 raise Exception(
-                    "Found element of type {} when first was {}".format(type(item), data_type)
+                    "Found element of type {} when first was {}".format(
+                        type(item), data_type
+                    )
                 )
 
         if data_type == float:
-            converted_data = (ctypes.c_float*len(data))(*data)
+            converted_data = (ctypes.c_float * len(data))(*data)
         elif data_type == int:
-            converted_data = (ctypes.c_short*len(data))(*data)
+            converted_data = (ctypes.c_short * len(data))(*data)
         else:
-            raise Exception("I don't know how to convert type {}".format(data_type))
+            raise Exception(
+                "I don't know how to convert type {}".format(data_type)
+            )
 
         self.base_gl.bufferData(
             target,
@@ -131,17 +141,17 @@ class GL:
 
     def uniform1f(self, location, v):
         if isinstance(v, float):
-           v = ctypes.c_float(v)
+            v = ctypes.c_float(v)
         self.base_gl.uniform1f(location, v)
 
 
     def uniform3f(self, location, v0, v1, v2):
         if isinstance(v0, float) or isinstance(v0, int):
-           v0 = ctypes.c_float(v0)
+            v0 = ctypes.c_float(v0)
         if isinstance(v1, float) or isinstance(v1, int):
-           v1 = ctypes.c_float(v1)
+            v1 = ctypes.c_float(v1)
         if isinstance(v2, float) or isinstance(v2, int):
-           v2 = ctypes.c_float(v2)
+            v2 = ctypes.c_float(v2)
         self.base_gl.uniform3f(location, v0, v1, v2)
 
 
@@ -152,7 +162,7 @@ class GL:
 
 
     def uniformMatrix3fv(self, location, transpose, value):
-        if transpose != False:
+        if transpose:
             raise ValueError("Transpose must be False -- see OpenGL spec")
         if isinstance(value, np.ndarray):
             value = np.asfortranarray(value, dtype=np.float32).ctypes.data
@@ -160,7 +170,7 @@ class GL:
 
 
     def uniformMatrix4fv(self, location, transpose, value):
-        if transpose != False:
+        if transpose:
             raise ValueError("Transpose must be False -- see OpenGL spec")
         if isinstance(value, np.ndarray):
             value = np.asfortranarray(value, dtype=np.float32).ctypes.data
@@ -174,7 +184,8 @@ class GL:
 
 
     def texImage2D(
-        self, target, level, internal_format, width, height, border, format, type, data
+        self, target, level, internal_format, width, height,
+        border, format, type, data
     ):
         if isinstance(data, np.ndarray):
             data = data.ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte))

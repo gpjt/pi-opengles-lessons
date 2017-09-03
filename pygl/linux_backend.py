@@ -55,10 +55,11 @@ class Backend(object):
 
         window.map()
 
-        self.surface = openegl.eglCreateWindowSurface(
+        surface = openegl.eglCreateWindowSurface(
             display, config, window.id, 0
         )
-        if self.surface == egl_constants.EGL_NO_SURFACE:
+        if surface == egl_constants.EGL_NO_SURFACE:
             raise Exception(
                 "Could not create surface: {}".format(openegl.eglGetError())
             )
+        return surface

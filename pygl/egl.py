@@ -96,8 +96,8 @@ class EGL(object):
         if dispman_update == 0:
             raise Exception("Could not start updating display")
 
-        dst_rect = eglints((0, 0, width.value, height.value))
-        src_rect = eglints((0, 0, width.value<<16, height.value<<16))
+        dst_rect = eglints((0, 0, self.width.value, self.height.value))
+        src_rect = eglints((0, 0, self.width.value<<16, self.height.value<<16))
         dispman_element = bcm.vc_dispmanx_element_add(
             dispman_update, dispman_display,
             0, ctypes.byref(dst_rect), 0,

@@ -11,7 +11,7 @@ egl_constants.EGL_NO_DISPLAY = 0
 egl_constants.EGL_NO_SURFACE = 0
 egl_constants.DISPMANX_PROTECTION_NONE = 0
 
-from pygl.egl_libs import bcm, openegl
+from pygl.egl_libs import bcm, opengles, openegl
 from pygl.gl import GL
 
 eglint = ctypes.c_int
@@ -21,56 +21,12 @@ def eglints(L):
     return (eglint*len(L))(*L)
 
 
-class PiBackend(object):
-
-    def host_init(self):
-        if bcm.bcm_host_init() != 0:
-            raise Exception("Could not initialize Pi GPU")
-
-
-    def get_display_size(self):
-        width = eglint()
-        height = eglint()
-        s = bcm.graphics_get_display_size(0, ctypes.byref(width),ctypes.byref(height))
-        if s < 0:
-            raise Exception("Could not get display size")
-        return width, height
-
-
-    def create_egl_surface(self, config, width, height):
-        dispman_display = bcm.vc_dispmanx_display_open(0)
-        if dispman_display == 0:
-            raise Exception("Could not open display")
-
-        dispman_update = bcm.vc_dispmanx_update_start(0)
-        if dispman_update == 0:
-            raise Exception("Could not start updating display")
-
-        dst_rect = eglints((0, 0, width.value, height.value))
-        src_rect = eglints((0, 0, width.value<<16, height.value<<16))
-        dispman_element = bcm.vc_dispmanx_element_add(
-            dispman_update, dispman_display,
-            0, ctypes.byref(dst_rect), 0,
-            ctypes.byref(src_rect),
-            egl_constants.DISPMANX_PROTECTION_NONE,
-            0, 0, 0
-        )
-        bcm.vc_dispmanx_update_submit_sync(dispman_update)
-
-        nativewindow = eglints((dispman_element, width, height))
-        nw_p = ctypes.pointer(nativewindow)
-        surface = openegl.eglCreateWindowSurface(self.display, config, nw_p, 0)
-        if surface == egl_constants.EGL_NO_SURFACE:
-            raise Exception("Could not create surface")
-
-        return surface
-
-
 class EGL(object):
 
     def __init__(self):
-        backend = PiBackend()
-        backend.host_init()
+        b = bcm.bcm_host_init()
+        if b != 0:
+            raise Exception("Could not initialize Pi GPU")
 
         self.display = openegl.eglGetDisplay(egl_constants.EGL_DEFAULT_DISPLAY)
         if self.display == egl_constants.EGL_NO_DISPLAY:
@@ -113,8 +69,39 @@ class EGL(object):
         if self.context == egl_constants.EGL_NO_CONTEXT:
             raise Exception("Could not create EGL context: {}".format(openegl.eglGetError()))
 
-        self.width, self.height = backend.get_display_size()
-        self.surface = backend.create_egl_surface(config, self.width, self.height)
+        width = eglint()
+        height = eglint()
+        s = bcm.graphics_get_display_size(0, ctypes.byref(width),ctypes.byref(height))
+        self.width = width
+        self.height = height
+        if s < 0:
+            raise Exception("Could not get display size")
+
+        dispman_display = bcm.vc_dispmanx_display_open(0)
+        if dispman_display == 0:
+            raise Exception("Could not open display")
+
+        dispman_update = bcm.vc_dispmanx_update_start(0)
+        if dispman_update == 0:
+            raise Exception("Could not start updating display")
+
+        dst_rect = eglints((0, 0, width.value, height.value))
+        src_rect = eglints((0, 0, width.value<<16, height.value<<16))
+        dispman_element = bcm.vc_dispmanx_element_add(
+            dispman_update, dispman_display,
+            0, ctypes.byref(dst_rect), 0,
+            ctypes.byref(src_rect),
+            egl_constants.DISPMANX_PROTECTION_NONE,
+            0, 0, 0
+        )
+        bcm.vc_dispmanx_update_submit_sync(dispman_update)
+
+        nativewindow = eglints((dispman_element, width, height))
+        nw_p = ctypes.pointer(nativewindow)
+        self.nw_p = nw_p
+        self.surface = openegl.eglCreateWindowSurface(self.display, config, nw_p, 0)
+        if self.surface == egl_constants.EGL_NO_SURFACE:
+            raise Exception("Could not create surface")
 
         r = openegl.eglMakeCurrent(self.display, self.surface, self.surface, self.context)
         if r == 0:

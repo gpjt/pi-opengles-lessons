@@ -15,8 +15,8 @@ from pygl.gl import GL
 
 # Open the libraries
 bcm = ctypes.CDLL('libbcm_host.so')
-opengles = ctypes.CDLL('libGLESv2.so')
-openegl = ctypes.CDLL('libEGL.so')
+opengles = ctypes.CDLL('libbrcmGLESv2.so')
+openegl = ctypes.CDLL('libbrcmEGL.so')
 
 eglint = ctypes.c_int
 

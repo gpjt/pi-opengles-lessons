@@ -1,7 +1,7 @@
 import ctypes
 import numpy as np
 
-opengles = ctypes.CDLL('libGLESv2.so')
+opengles = ctypes.CDLL('libbrcmGLESv2.so')
 
 import pygl.gl2
 

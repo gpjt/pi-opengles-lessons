@@ -196,6 +196,7 @@ def main():
         start = time.time()
         draw_scene(egl, gl, shader_program, triangle_shape, square_shape)
         animate(triangle_shape, square_shape)
+        egl.pump_events()
         remainder = (1/60.0) - (time.time() - start)
         if remainder > 0:
             time.sleep(remainder)

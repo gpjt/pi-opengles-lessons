@@ -100,3 +100,7 @@ class EGL(object):
 
     def swap_buffers(self):
         openegl.eglSwapBuffers(self.display, self.surface)
+
+
+    def pump_events(self):
+        self.backend.pump_events()

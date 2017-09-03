@@ -55,3 +55,7 @@ class Backend(object):
         if surface == egl_constants.EGL_NO_SURFACE:
             raise Exception("Could not create surface")
         return surface
+
+
+    def pump_events(self):
+        pass

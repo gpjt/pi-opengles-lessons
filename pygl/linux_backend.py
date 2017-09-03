@@ -63,3 +63,9 @@ class Backend(object):
                 "Could not create surface: {}".format(openegl.eglGetError())
             )
         return surface
+
+
+    def pump_events(self):
+        n = self.x_display.pending_events()
+        for i in range(n):
+            self.x_display.next_event()

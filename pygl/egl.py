@@ -32,8 +32,8 @@ class PiBackend(object):
     def get_display_size(self):
         width = eglint()
         height = eglint()
-        s = bcm.graphics_get_display_size(0, ctypes.byref(width),ctypes.byref(height))
-        if s < 0:
+        error_code = bcm.graphics_get_display_size(0, ctypes.byref(width),ctypes.byref(height))
+        if error_code < 0:
             raise Exception("Could not get display size")
         return width, height
 
@@ -58,10 +58,11 @@ class PiBackend(object):
         )
         bcm.vc_dispmanx_update_submit_sync(dispman_update)
 
-        nativewindow = eglints((dispman_element, width, height))
-        nw_p = ctypes.pointer(nativewindow)
-        self.nw_p = nw_p
-        surface = openegl.eglCreateWindowSurface(display, config, nw_p, 0)
+        native_window = eglints((dispman_element, width, height))
+        # We need to keep a reference to this because if it gets
+        # GCed we stop displaying stuff.
+        self.native_window_pointer = ctypes.pointer(nativewindow)
+        surface = openegl.eglCreateWindowSurface(display, config, self.native_window_pointer, 0)
         if surface == egl_constants.EGL_NO_SURFACE:
             raise Exception("Could not create surface")
         return surface

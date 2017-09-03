@@ -61,7 +61,7 @@ class PiBackend(object):
         native_window = eglints((dispman_element, width, height))
         # We need to keep a reference to this because if it gets
         # GCed we stop displaying stuff.
-        self.native_window_pointer = ctypes.pointer(nativewindow)
+        self.native_window_pointer = ctypes.pointer(native_window)
         surface = openegl.eglCreateWindowSurface(display, config, self.native_window_pointer, 0)
         if surface == egl_constants.EGL_NO_SURFACE:
             raise Exception("Could not create surface")

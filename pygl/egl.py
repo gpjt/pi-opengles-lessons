@@ -87,7 +87,6 @@ class EGL(object):
 
         self.width, self.height = backend.get_display_size()
 
-
         dispman_display = bcm.vc_dispmanx_display_open(0)
         if dispman_display == 0:
             raise Exception("Could not open display")
@@ -107,7 +106,7 @@ class EGL(object):
         )
         bcm.vc_dispmanx_update_submit_sync(dispman_update)
 
-        nativewindow = eglints((dispman_element, width, height))
+        nativewindow = eglints((dispman_element, self.width, self.height))
         nw_p = ctypes.pointer(nativewindow)
         self.nw_p = nw_p
         self.surface = openegl.eglCreateWindowSurface(self.display, config, nw_p, 0)

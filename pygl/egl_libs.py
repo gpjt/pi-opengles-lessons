@@ -1,11 +1,6 @@
 import ctypes
 import ctypes.util
 
-platform = None
-
-PLATFORM_PI = "pi"
-PLATFORM_LINUX = "linux"
-
 
 def eglints(L):
     """Converts a tuple to an array of eglints (would a pointer return be better?)"""
@@ -13,12 +8,10 @@ def eglints(L):
 
 
 if ctypes.util.find_library('bcm_host'):
-    platform = PLATFORM_PI
     opengles = ctypes.CDLL('libbrcmGLESv2.so')
     openegl = ctypes.CDLL('libbrcmEGL.so')
     from pygl.pi_backend import Backend  # noqa
 else:
-    platform = PLATFORM_LINUX
     opengles = ctypes.CDLL('libGLESv2.so')
     openegl = ctypes.CDLL('libEGL.so')
 

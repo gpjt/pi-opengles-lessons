@@ -11,13 +11,12 @@ egl_constants.EGL_NO_DISPLAY = 0
 egl_constants.EGL_NO_SURFACE = 0
 egl_constants.DISPMANX_PROTECTION_NONE = 0
 
+from pygl.egl_libs import bcm, opengles, openegl
 from pygl.gl import GL
 
-
-# Open the libraries
-bcm = ctypes.CDLL('libbcm_host.so')
-opengles = ctypes.CDLL('libbrcmGLESv2.so')
-openegl = ctypes.CDLL('libbrcmEGL.so')
+import Xlib.display
+import Xlib.Xatom
+import Xlib.Xutil
 
 eglint = ctypes.c_int
 
@@ -37,7 +36,7 @@ class EGL(object):
         if self.display == egl_constants.EGL_NO_DISPLAY:
             raise Exception("Could not open EGL display: {}".format(openegl.eglGetError()))
 
-        if openegl.eglInitialize(self.display, 0, 0) == egl_constants.EGL_FALSE:
+        if openegl.eglInitialize(self.display, None, None) == egl_constants.EGL_FALSE:
             raise Exception("Could not initialise EGL: {}".format(openegl.eglGetError()))
 
         attribute_list = eglints((

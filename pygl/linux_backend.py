@@ -1,5 +1,7 @@
 import ctypes
-import Xlib
+import Xlib.display
+import Xlib.Xatom
+import Xlib.Xutil
 
 from pygl import egl_constants
 from pygl.egl_libs import openegl
@@ -13,11 +15,13 @@ class Backend(object):
     def initialize(self):
         pass
 
+
     def get_display_size(self):
         self.x_display = Xlib.display.Display()
         self.screen = self.x_display.screen()
         self.width = ctypes.c_int(self.screen.width_in_pixels)
         self.height = ctypes.c_int(self.screen.height_in_pixels)
+        return self.width, self.height
 
 
     def create_surface(self, display, config, width, height):
@@ -51,9 +55,8 @@ class Backend(object):
 
         window.map()
 
-        print(self.display)
         self.surface = openegl.eglCreateWindowSurface(
-            self.display, config, window.id, 0
+            display, config, window.id, 0
         )
         if self.surface == egl_constants.EGL_NO_SURFACE:
             raise Exception(

@@ -100,7 +100,7 @@ class GL:
         self.base_gl.genBuffers(1, ctypes.byref(result))
         return result
 
-    
+
     def deleteBuffer(self, buffer):
         self.base_gl.deleteBuffers(1, ctypes.byref(ctypes.c_int(buffer)))
 
@@ -130,7 +130,7 @@ class GL:
 
 
     def uniform1f(self, location, v):
-        if isinstance(v, float) or isinstance(v0, int):
+        if isinstance(v, float):
            v = ctypes.c_float(v)
         self.base_gl.uniform1f(location, v)
 

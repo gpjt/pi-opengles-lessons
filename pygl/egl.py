@@ -21,12 +21,20 @@ def eglints(L):
     return (eglint*len(L))(*L)
 
 
+
+class PiBackend(object):
+
+    def initialize(self):
+        if bcm.bcm_host_init() != 0:
+            raise Exception("Could not initialize Pi GPU")
+
+
+
 class EGL(object):
 
     def __init__(self):
-        b = bcm.bcm_host_init()
-        if b != 0:
-            raise Exception("Could not initialize Pi GPU")
+        backend = PiBackend()
+        backend.initialize()
 
         self.display = openegl.eglGetDisplay(egl_constants.EGL_DEFAULT_DISPLAY)
         if self.display == egl_constants.EGL_NO_DISPLAY:

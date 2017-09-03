@@ -14,10 +14,6 @@ egl_constants.DISPMANX_PROTECTION_NONE = 0
 from pygl.egl_libs import bcm, opengles, openegl
 from pygl.gl import GL
 
-import Xlib.display
-import Xlib.Xatom
-import Xlib.Xutil
-
 eglint = ctypes.c_int
 
 def eglints(L):

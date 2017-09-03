@@ -2,7 +2,7 @@ import ctypes
 import ctypes.util
 
 bcm_name = ctypes.util.find_library('bcm_host')
-bcm = ctypes.CDLL(name)
+bcm = ctypes.CDLL(bcm_name)
 opengles = ctypes.CDLL('libbrcmGLESv2.so')
 openegl = ctypes.CDLL('libbrcmEGL.so')
 

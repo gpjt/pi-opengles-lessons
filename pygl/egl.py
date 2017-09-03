@@ -115,7 +115,7 @@ class EGL(object):
             raise Exception("Could not create EGL context: {}".format(openegl.eglGetError()))
 
         self.width, self.height = backend.get_display_size()
-        self.surface = backend.create_surface(self.display, config, width, height)
+        self.surface = backend.create_surface(self.display, config, self.width, self.height)
 
         r = openegl.eglMakeCurrent(self.display, self.surface, self.surface, self.context)
         if r == 0:

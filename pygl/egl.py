@@ -29,6 +29,14 @@ class PiBackend(object):
             raise Exception("Could not initialize Pi GPU")
 
 
+    def get_display_size(self):
+        width = eglint()
+        height = eglint()
+        s = bcm.graphics_get_display_size(0, ctypes.byref(width),ctypes.byref(height))
+        if s < 0:
+            raise Exception("Could not get display size")
+        return width, height
+
 
 class EGL(object):
 
@@ -77,13 +85,8 @@ class EGL(object):
         if self.context == egl_constants.EGL_NO_CONTEXT:
             raise Exception("Could not create EGL context: {}".format(openegl.eglGetError()))
 
-        width = eglint()
-        height = eglint()
-        s = bcm.graphics_get_display_size(0, ctypes.byref(width),ctypes.byref(height))
-        self.width = width
-        self.height = height
-        if s < 0:
-            raise Exception("Could not get display size")
+        self.width, self.height = backend.get_display_size()
+
 
         dispman_display = bcm.vc_dispmanx_display_open(0)
         if dispman_display == 0:

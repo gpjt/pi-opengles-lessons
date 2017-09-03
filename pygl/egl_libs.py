@@ -1,10 +1,24 @@
 import ctypes
 import ctypes.util
 
+platform = None
+
+PLATFORM_PI = "pi"
+PLATFORM_LINUX = "linux"
+
+
 bcm_name = ctypes.util.find_library('bcm_host')
-bcm = ctypes.CDLL(bcm_name)
-opengles = ctypes.CDLL('libbrcmGLESv2.so')
-openegl = ctypes.CDLL('libbrcmEGL.so')
+if bcm_name:
+    platform = PLATFORM_PI
+    bcm = ctypes.CDLL(bcm_name)
+    opengles = ctypes.CDLL('libbrcmGLESv2.so')
+    openegl = ctypes.CDLL('libbrcmEGL.so')
+else:
+    platform = PLATFORM_LINUX
+    bcm = None
+    opengles = ctypes.CDLL('libGLESv2.so')
+    openegl = ctypes.CDLL('libEGL.so')
+
 
 openegl.eglGetDisplay.restype = ctypes.c_void_p
 

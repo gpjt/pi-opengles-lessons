@@ -60,7 +60,7 @@ class PiBackend(object):
 
         nativewindow = eglints((dispman_element, width, height))
         nw_p = ctypes.pointer(nativewindow)
-        # self.nw_p = nw_p
+        self.nw_p = nw_p
         surface = openegl.eglCreateWindowSurface(display, config, nw_p, 0)
         if surface == egl_constants.EGL_NO_SURFACE:
             raise Exception("Could not create surface")
@@ -70,8 +70,8 @@ class PiBackend(object):
 class EGL(object):
 
     def __init__(self):
-        backend = PiBackend()
-        backend.initialize()
+        self.backend = PiBackend()
+        self.backend.initialize()
 
         self.display = openegl.eglGetDisplay(egl_constants.EGL_DEFAULT_DISPLAY)
         if self.display == egl_constants.EGL_NO_DISPLAY:
@@ -114,8 +114,8 @@ class EGL(object):
         if self.context == egl_constants.EGL_NO_CONTEXT:
             raise Exception("Could not create EGL context: {}".format(openegl.eglGetError()))
 
-        self.width, self.height = backend.get_display_size()
-        self.surface = backend.create_surface(self.display, config, self.width, self.height)
+        self.width, self.height = self.backend.get_display_size()
+        self.surface = self.backend.create_surface(self.display, config, self.width, self.height)
 
         r = openegl.eglMakeCurrent(self.display, self.surface, self.surface, self.context)
         if r == 0:

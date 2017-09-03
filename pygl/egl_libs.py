@@ -7,6 +7,11 @@ PLATFORM_PI = "pi"
 PLATFORM_LINUX = "linux"
 
 
+def eglints(L):
+    """Converts a tuple to an array of eglints (would a pointer return be better?)"""
+    return (ctypes.c_int*len(L))(*L)
+
+
 if ctypes.util.find_library('bcm_host'):
     platform = PLATFORM_PI
     opengles = ctypes.CDLL('libbrcmGLESv2.so')
@@ -16,11 +21,6 @@ else:
     platform = PLATFORM_LINUX
     opengles = ctypes.CDLL('libGLESv2.so')
     openegl = ctypes.CDLL('libEGL.so')
-
-
-def eglints(L):
-    """Converts a tuple to an array of eglints (would a pointer return be better?)"""
-    return (ctypes.c_int*len(L))(*L)
 
 
 openegl.eglGetDisplay.restype = ctypes.c_void_p

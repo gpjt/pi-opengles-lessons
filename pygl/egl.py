@@ -8,7 +8,7 @@ from pygl.gl import GL
 egl_constants.EGL_FALSE = 0
 egl_constants.EGL_DEFAULT_DISPLAY = 0
 egl_constants.EGL_NO_CONTEXT = 0
-egl_constants.EGL_NO_DISPLAY = 0
+egl_constants.EGL_NO_DISPLAY = None
 egl_constants.EGL_NO_SURFACE = 0
 egl_constants.DISPMANX_PROTECTION_NONE = 0
 

@@ -68,7 +68,7 @@ def create_shader(gl, code, shader_type):
         raise Exception("Shader compile error: {}".format(log))
 
     return shader
-    
+
 
 class Program:
     def __init__(self, gl):
@@ -193,7 +193,7 @@ class Shape:
 
 
 
-def init_buffers(gl): 
+def init_buffers(gl):
     cube_shape = Shape(
         gl,
         [
@@ -272,7 +272,7 @@ def init_buffers(gl):
             [1.0, 0.0],
             [1.0, 1.0],
             [0.0, 1.0],
-        ], 
+        ],
         normals = [
             # Front face
             [ 0.0,  0.0,  1.0],
@@ -324,7 +324,7 @@ class LightData(object):
         self.ambient_r = 0.0
         self.ambient_g = 0.2
         self.ambient_b = 0.0
-    
+
         self.direction_x = -0.25
         self.direction_y = -0.25
         self.direction_z = -1.0
@@ -387,7 +387,7 @@ def draw_scene(egl, gl, shader_program, cube_shape, texture, lighting):
             lighting.ambient_g,
             lighting.ambient_b,
         )
-        
+
         lighting_direction = np.array([
             lighting.direction_x,
             lighting.direction_y,
@@ -405,7 +405,6 @@ def draw_scene(egl, gl, shader_program, cube_shape, texture, lighting):
             lighting.directional_g,
             lighting.directional_b,
         )
-    
 
     gl.uniformMatrix4fv(shader_program.p_matrix_uniform, False, p_matrix)
     gl.uniformMatrix4fv(shader_program.mv_matrix_uniform, False, mv_matrix)
@@ -441,6 +440,6 @@ def main():
             time.sleep(remainder)
 
 
-    
+
 if __name__ == "__main__":
     main()

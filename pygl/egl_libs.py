@@ -55,3 +55,16 @@ openegl.eglMakeCurrent.argtypes = [
     ctypes.c_void_p,
     ctypes.c_void_p
 ]
+
+opengles.glUniformMatrix4fv.argtypes = [
+    ctypes.c_int,
+    ctypes.c_int,
+    ctypes.c_ubyte,
+    ctypes.c_void_p
+]
+opengles.glUniformMatrix3fv.argtypes = [
+    ctypes.c_int,
+    ctypes.c_int,
+    ctypes.c_ubyte,
+    ctypes.c_void_p
+]

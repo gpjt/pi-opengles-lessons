@@ -56,6 +56,11 @@ openegl.eglMakeCurrent.argtypes = [
     ctypes.c_void_p
 ]
 
+openegl.eglSwapBuffers.argtypes = [
+    ctypes.c_void_p,
+    ctypes.c_void_p
+]
+
 opengles.glUniformMatrix4fv.argtypes = [
     ctypes.c_int,
     ctypes.c_int,
